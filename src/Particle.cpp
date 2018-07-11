@@ -1,35 +1,12 @@
 //#ifndef CPPPC_PROJECT__PARTICLE_H_INCLUDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <array>
 
-using vec = std::array<float, 3>;
+namespace c3p {
 
-vec add(vec a, vec b)
-{
-    vec c;
-    for (int i = 0; i<3; ++i)
-    {
-        c[i] = a[i] + b[i];
-    }
-    return c;
-}
 
-glm::vec3 vectovec3(vec & vector, glm::vec3 glmvec)
-{
-    glmvec.x = vector[0];
-    glmvec.y = vector[1];
-    glmvec.z = vector[2];
-    return glmvec;
-}
-
-vec vec3tovec(glm::vec3 glmvec, vec & vector)
-{
-    vector[0] = glmvec.x;
-    vector[1] = glmvec.y;
-    vector[2] = glmvec.z;
-    return vector;
-}
+//using vec = std::array<float, 3>;
+using vec = glm::vec3;
 
 class Particle 
 {
@@ -39,38 +16,16 @@ class Particle
     Particle()
     {   
         static GLfloat g_color_buffer_data[3];
-        static GLfloat g_vertex_buffer_data[3];
         for (int i = 0; i < 3; ++i)
         {
             float r = rand();
             r = r/ (float) RAND_MAX;
             _color[i] = r;
-            g_color_buffer_data[i] = r;
-            _location[i] = r*12-6;
+            _location[i] = r*10-5;
+            _origin = _location;
+//            _mass = r*100;
+            _mass = r*10 + 50;
         }
-        glGenBuffers(1, &_colorbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, _colorbuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-        fillVertexBuffer();
-    }
-
-    Particle(vec loc)
-        :_location(loc) 
-    {   
-        static GLfloat g_color_buffer_data[3];
-        for (int i = 0; i < 3; ++i)
-        {
-            float r = rand();
-            r = r/ (float) RAND_MAX;
-            _color[i] = r;
-            g_color_buffer_data[i] = r;
-        }
-        glGenBuffers(1, &_colorbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, _colorbuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-
-        fillVertexBuffer();
     }
 
     ~Particle() = default;
@@ -81,52 +36,45 @@ class Particle
     //move constructor and assignment not necessary, because so small
     //yeah but if I make a ton of them?
 
-//    vec color() 
-//    {
-//        return _color;
-//    }
-//
-//    decltype(auto) color()
-//    {
-//        return _colorbuffer;
-//    }
-//    
-//
-    vec location() const
+    vec origin() const
     {
-        return _location;
+        return _origin;
     }
 
-    vec location(float x, float y)
+    
+    void clear() //clear acceleration before next frame (accumulative)
     {
-        _location = {x,y,0};
+        _acceleration = glm::vec3(0.0, 0.0, 0.0);
     }
-//
-//    vec acceleration()
-//    {
-//        return _acceleration;
-//    }
-//
-//    vec velocity()
-//    {
-//        return _velocity;
-//    }
-//
-    void update()
+
+    void update(float deltaT) //float because glm::vec3 can't deal with double
     {
-        _velocity = add(_velocity, _acceleration);
-        _location = add(_location, _velocity);
+        //v(t)= Int(acc) = acc*t + C
+        //C is the integration constant, which is the velocity at the previous point in time
+        //--> v(t) = a*t + v(t-1)
+        //t in this case is equal to 1, as I am using frames to measure time (TODO frames are not always constant, use actual time eg seconds with delta glfwGetTime
+        //as a result, the velocity v(t) = acc*1 + v(t-1)
+        _velocity += _acceleration*deltaT; 
+        //s(t) = Int(velocity) = Int(acc*t + C) = (a*t^2)/2 + C*t + C1
+        //C1 is the location at the previous point in time
+        //--> s(t) = (a*t^2)/2 + v(t) + s(t-1)
+        //again, t is equal to 
+        _location += (_acceleration*deltaT)/2.0f + _velocity;
     }
-    void followMouse(double xmouse, double ymouse)
+
+    void gravitate(vec point, double strength)
     {
-        vec3 mouse = {xmouse, ymouse, 0.0};
-        //expression template?
-        vec3 loc = vectovec3(_location, loc);
-        vec3 dir = mouse - loc;
-//        normalize(dir);
-        dir *= 0.001;
-        vec3tovec(dir, _acceleration);
-        update();
+        vec dir = point - _location;
+        glm::normalize(dir);
+        dir *= strength;
+        applyForce(dir);
+    }
+
+    //apply a force (jerk)
+    void applyForce(glm::vec3 force)
+    {
+        force /= _mass; //f = m*a
+        _acceleration += force;
     }
 
     //write location to vertex buffer (only works for single vertex particles)
@@ -137,10 +85,22 @@ class Particle
         glBindBuffer(GL_ARRAY_BUFFER, _vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
     }
+
+    void fillColorBuffer()
+    {
+        GLfloat buffer_data[3] = {_color[0], _color[1], _color[2]};
+        glGenBuffers(1, &_colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, _colorbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
+    }
     
+    //blend mode --> spuren
+    //fft to plug in audio
     void draw(glm::mat4 & mvp, GLuint MatrixID)
     {
+        update(glfwGetTime());
         fillVertexBuffer();
+        fillColorBuffer();
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexbuffer);
@@ -169,17 +129,25 @@ class Particle
         glDisableVertexAttribArray(1);
 
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
+
+        (*this).clear();
     }
 
 
   private:
+    vec _origin;
     vec _location;
     vec _velocity;
-    vec _acceleration;
+    vec _acceleration;// = glm::vec3(0,0,0);
     vec _color;
+    float _mass = 1.0;
+    float _ttl;
     
+    //part of the Projection System
     GLuint _colorbuffer;
     GLuint _vertexbuffer; 
 
 
 };
+
+} //namespace c3p

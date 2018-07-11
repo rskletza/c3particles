@@ -1,4 +1,4 @@
-//template expressions
+//expression templates
 //constexpr
 //
 #include <stdio.h>
@@ -16,10 +16,23 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace glm;
 #include <common/shader.hpp>
 //#include <common/controls.hpp>
 #include <src/Particle.cpp>
+#//include <src/ParticleSystem.cpp>
+
+using namespace glm;
+using namespace c3p;
+
+bool mousedown; //TODO eek no global variables!
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+        mousedown = true;
+    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+        mousedown = false;
+}
 
 int main( void )
 {
@@ -38,7 +51,8 @@ int main( void )
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow( 1024, 768, "Playground", NULL, NULL);
+	//window = glfwCreateWindow( 1280, 1440, "c3particles", NULL, NULL);
+	window = glfwCreateWindow( 1024, 768, "c3particles", NULL, NULL);
 
 	if( window == NULL ){
 		fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
@@ -60,8 +74,10 @@ int main( void )
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+
 	// Dark blue background
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glPointSize(15.0f);
 
@@ -91,13 +107,12 @@ int main( void )
   glm::mat4 mvp        = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
     std::srand(std::time(nullptr));
-
     int width, height;
     double xpos, ypos;
-    Particle p;
+//    ParticleSystem particles = ParticleSystem(20);
+    int partnum = 20;
     std::vector<Particle> particles;
-    particles.push_back(p);
-    for (int i = 0; i<5; ++i)
+    for (int i = 0; i<partnum; ++i)
     {
         particles.push_back(std::move(Particle()));
     }
@@ -108,6 +123,7 @@ int main( void )
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
         // Accept fragment if it closer to the camera than the former one
         glDepthFunc(GL_LESS);
         
@@ -126,14 +142,32 @@ int main( void )
         //dirty hack to scale movement. TODO invert projection matrix or something
         xpos /= 100;
         ypos /= 100;
+
+//        std::cout << glfwGetTime() << std::endl;
         
         
-        for (int i = 0; i<5; ++i)
+        vec3 random = {rand()/RAND_MAX,rand()/RAND_MAX,rand()/RAND_MAX};
+        random *= 1000;
+        for (int i = 0; i<partnum; ++i)
         {
-//            particles[i].location(-xpos+i, -ypos+i);
-            particles[i].followMouse(-xpos, -ypos);
+//            particles[i].followMouse(-xpos, -ypos);
+            if(mousedown)
+                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.01);
+            else
+                particles[i].gravitate(particles[i].origin(), 0.01);
+            particles[i].applyForce(random);
+        //    particles[i].applyForce(vec3(0.01,0.0,0.0));
             particles[i].draw(mvp, MatrixID);
+            
         }
+
+//            if(mousedown)
+//                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.01);
+//            else
+//                particles[i].gravitate(particles[i].origin(), 0.01);
+//            particles[i].applyForce(random);
+//        //    particles[i].applyForce(vec3(0.01,0.0,0.0));
+//            particles[i].draw(mvp, MatrixID);
 
 
 		// Swap buffers
