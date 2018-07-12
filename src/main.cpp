@@ -18,8 +18,8 @@ GLFWwindow* window;
 
 #include <common/shader.hpp>
 //#include <common/controls.hpp>
-#include <src/Particle.cpp>
-#//include <src/ParticleSystem.cpp>
+//#include <src/Particle.cpp>
+#include <src/ParticleSystem.cpp>
 
 using namespace glm;
 using namespace c3p;
@@ -76,7 +76,7 @@ int main( void )
 
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-	// Dark blue background
+	// black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     glPointSize(15.0f);
@@ -109,13 +109,13 @@ int main( void )
     std::srand(std::time(nullptr));
     int width, height;
     double xpos, ypos;
-//    ParticleSystem particles = ParticleSystem(20);
-    int partnum = 20;
-    std::vector<Particle> particles;
-    for (int i = 0; i<partnum; ++i)
-    {
-        particles.push_back(std::move(Particle()));
-    }
+    ParticleSystem particles(20);
+//    int partnum = 20;
+//    std::vector<Particle> particles;
+//    for (int i = 0; i<partnum; ++i)
+//    {
+//        particles.push_back(std::move(Particle()));
+//    }
 
 	do{
         //clear the screen and clear the depth
@@ -148,26 +148,28 @@ int main( void )
         
         vec3 random = {rand()/RAND_MAX,rand()/RAND_MAX,rand()/RAND_MAX};
         random *= 1000;
-        for (int i = 0; i<partnum; ++i)
-        {
-//            particles[i].followMouse(-xpos, -ypos);
-            if(mousedown)
-                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.01);
-            else
-                particles[i].gravitate(particles[i].origin(), 0.01);
-            particles[i].applyForce(random);
-        //    particles[i].applyForce(vec3(0.01,0.0,0.0));
-            particles[i].draw(mvp, MatrixID);
-            
-        }
-
+//        for (int i = 0; i<partnum; ++i)
+//        {
+////            particles[i].followMouse(-xpos, -ypos);
 //            if(mousedown)
-//                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.01);
+//                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.1);
 //            else
-//                particles[i].gravitate(particles[i].origin(), 0.01);
+//                particles[i].gravitate(particles[i].origin(), 0.1);
 //            particles[i].applyForce(random);
 //        //    particles[i].applyForce(vec3(0.01,0.0,0.0));
 //            particles[i].draw(mvp, MatrixID);
+//            
+//        }
+
+//            particles.applyForceAll(vec3(0.01,0.0,0.0));
+            if(mousedown)
+//                particles.print();
+                particles.gravitate(vec3(-xpos, -ypos, 0.0), 0.1);
+            else
+                particles.gravitateOrigin(0.1);
+//            particles.applyForceAll(random);
+//                particles.print();
+            particles.draw(mvp, MatrixID);
 
 
 		// Swap buffers

@@ -1,6 +1,7 @@
 //#ifndef CPPPC_PROJECT__PARTICLE_H_INCLUDED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 namespace c3p {
 
@@ -14,6 +15,8 @@ class Particle
     using self_t = Particle;
 
     Particle()
+      :_velocity(0.0, 0.0, 0.0)
+      ,_acceleration(0.0,0.0,0.0)
     {   
         static GLfloat g_color_buffer_data[3];
         for (int i = 0; i < 3; ++i)
@@ -21,10 +24,10 @@ class Particle
             float r = rand();
             r = r/ (float) RAND_MAX;
             _color[i] = r;
-            _location[i] = r*10-5;
+            _location[i] = r*7-5;
             _origin = _location;
 //            _mass = r*100;
-            _mass = r*10 + 50;
+            _mass = r*10 + 200;
         }
     }
 
@@ -41,6 +44,15 @@ class Particle
         return _origin;
     }
 
+    vec location() const
+    {
+        return _location;
+    }
+
+    vec acceleration() const
+    {
+        return _acceleration;
+    }
     
     void clear() //clear acceleration before next frame (accumulative)
     {
@@ -55,11 +67,20 @@ class Particle
         //t in this case is equal to 1, as I am using frames to measure time (TODO frames are not always constant, use actual time eg seconds with delta glfwGetTime
         //as a result, the velocity v(t) = acc*1 + v(t-1)
         _velocity += _acceleration*deltaT; 
+
         //s(t) = Int(velocity) = Int(acc*t + C) = (a*t^2)/2 + C*t + C1
         //C1 is the location at the previous point in time
         //--> s(t) = (a*t^2)/2 + v(t) + s(t-1)
         //again, t is equal to 
         _location += (_acceleration*deltaT)/2.0f + _velocity;
+    }
+    
+    //apply a force (jerk)
+    void applyForce(glm::vec3 force)
+    {
+        force /= _mass; //f = m*a
+        //change is not persistent for some reason?????
+        _acceleration += force;
     }
 
     void gravitate(vec point, double strength)
@@ -68,13 +89,6 @@ class Particle
         glm::normalize(dir);
         dir *= strength;
         applyForce(dir);
-    }
-
-    //apply a force (jerk)
-    void applyForce(glm::vec3 force)
-    {
-        force /= _mass; //f = m*a
-        _acceleration += force;
     }
 
     //write location to vertex buffer (only works for single vertex particles)
