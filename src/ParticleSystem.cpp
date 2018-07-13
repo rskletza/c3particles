@@ -2,6 +2,7 @@
 #include <vector>
 #include <array>
 #include <iostream>
+#include <cmath>
 
 namespace c3p {
 
@@ -15,6 +16,7 @@ class ParticleSystem
     ParticleSystem() = delete;
 
     ParticleSystem(size_t size)
+        :_G(1.0*std::pow(10,-10)) //universal gravitational constant (actually 6.67*10^-11)
     {
         std::cout << "ParticleSystem constructor called" << std::endl;
         //_particles = new std::vector<Particle>(size, Particle());
@@ -68,7 +70,7 @@ class ParticleSystem
     }
 
     //TODO generalize so that gravitate can also implement gravitateOrigin. Maybe with a range?
-    void gravitate(vec point, double strength)
+    void addAttractor(vec point, double strength)
     {
         for(Particle & p : *_particles)
         {
@@ -84,10 +86,45 @@ class ParticleSystem
     {
         for(Particle & p : *_particles)
         {
-            vec dir = p.origin() - p.location();
-            glm::normalize(dir);
+            vec dir = glm::normalize(p.origin() - p.location());
             dir *= strength;
             p.applyForce(dir);
+        }
+    }
+
+    //simulate gravitational forces on all the particles
+    void nbodyGravity() const
+    {
+        for(Particle & p : *_particles)
+        {
+            float gforce;
+            vec direction;
+            for(Particle & other : *_particles)
+            {
+                if(p.location() == other.location())
+                    continue;
+                direction = other.location()-p.location();
+//                gforce = _G*(p.mass()*other.mass())/pow(glm::length(direction),2);
+            }
+            //p.applyForce(gforce*(glm::normalize(direction)));
+            p.applyForce(gforce*(direction));
+        }
+    }
+
+    //stiff spring has high tension (spring constant)
+    void nbodySprings(float tension) 
+    {
+
+    }
+
+    void addGForce(vec position, float mass)
+    {
+        for(Particle & p : *_particles)
+        {
+            vec direction = position - p.location();
+            float gforce = _G*(p.mass()*mass)/pow(glm::length(direction),2);
+
+            p.applyForce(gforce*glm::normalize(direction));
         }
     }
 
@@ -98,9 +135,9 @@ class ParticleSystem
             std::cout << "print" << std::endl;
             for(int i = 0; i<3; ++i)
             {
-                std::cout << "a " << i << " " << p.acceleration()[i] << std::endl;
-    //            std::cout << "v " << i << " " << _velocity[i] << std::endl;
-    //            std::cout << "s " << i << " " << _location[i] << std::endl;
+    //            std::cout << "a " << i << " " << p.acceleration()[i] << std::endl;
+    //            std::cout << "v " << i << " " << p.velocity()[i] << std::endl;
+                std::cout << "s " << i << " " << p.location()[i] << std::endl;
             }
         }
     }
@@ -125,6 +162,7 @@ class ParticleSystem
 
   private:
     std::vector<Particle> * _particles;
+    float _G;
 
 };
 

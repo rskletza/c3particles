@@ -79,7 +79,6 @@ int main( void )
 	// black background
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    glPointSize(15.0f);
 
 	GLuint VertexArrayID;
 	glGenVertexArrays(1, &VertexArrayID);
@@ -91,13 +90,13 @@ int main( void )
 	GLuint MatrixID = glGetUniformLocation(shaders, "MVP");
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
 	// Or, for an ortho camera :
 	//glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
 	
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
-								glm::vec3(0,0,-9), // Camera is at (4,3,3), in World Space
+								glm::vec3(0,0,-500), // Camera is at (x,y,z), in World Space
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 						   );
@@ -106,16 +105,11 @@ int main( void )
 	// Our ModelViewProjection : multiplication of our 3 matrices
   glm::mat4 mvp        = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
+    glPointSize(10.0f);
     std::srand(std::time(nullptr));
     int width, height;
     double xpos, ypos;
     ParticleSystem particles(20);
-//    int partnum = 20;
-//    std::vector<Particle> particles;
-//    for (int i = 0; i<partnum; ++i)
-//    {
-//        particles.push_back(std::move(Particle()));
-//    }
 
 	do{
         //clear the screen and clear the depth
@@ -127,50 +121,36 @@ int main( void )
         // Accept fragment if it closer to the camera than the former one
         glDepthFunc(GL_LESS);
         
-//        glClearColor(0.0f, 0.0f, rand()/(float)RAND_MAX, 0.0f);
-//
         //use own shader
         glUseProgram(shaders);
-        // Send our transformation to the currently bound shader, in the "MVP" uniform
-        // This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
-        //translate xpos and ypos to modelspace
+        
+        //calculate mouse position in world space
         glfwGetFramebufferSize(window, &width, &height);
         glfwGetCursorPos(window, &xpos, &ypos);
         xpos -= width/2;
         ypos -= height/2;
 
+
         //dirty hack to scale movement. TODO invert projection matrix or something
         xpos /= 100;
         ypos /= 100;
+        
 
-//        std::cout << glfwGetTime() << std::endl;
-        
-        
-        vec3 random = {rand()/RAND_MAX,rand()/RAND_MAX,rand()/RAND_MAX};
-        random *= 1000;
-//        for (int i = 0; i<partnum; ++i)
-//        {
-////            particles[i].followMouse(-xpos, -ypos);
-//            if(mousedown)
-//                particles[i].gravitate(vec3(-xpos, -ypos, 0.0), 0.1);
-//            else
-//                particles[i].gravitate(particles[i].origin(), 0.1);
-//            particles[i].applyForce(random);
-//        //    particles[i].applyForce(vec3(0.01,0.0,0.0));
-//            particles[i].draw(mvp, MatrixID);
-//            
-//        }
+
+        vec3 random = {rand()/(float)RAND_MAX,rand()/(float)RAND_MAX,rand()/(float)RAND_MAX};
 
 //            particles.applyForceAll(vec3(0.01,0.0,0.0));
             if(mousedown)
-//                particles.print();
-                particles.gravitate(vec3(-xpos, -ypos, 0.0), 0.1);
-            else
-                particles.gravitateOrigin(0.1);
-//            particles.applyForceAll(random);
-//                particles.print();
-            particles.draw(mvp, MatrixID);
+                particles.addAttractor(vec3(-xpos, -ypos, 0.0), 0.01);
+//            else
+//                particles.gravitateOrigin(0.7);
+//               particles.applyForceAll(random);
 
+//            particles.addAttractor(vec3{0,0,0}, 0.01);
+            particles.addGForce(vec3{0,0,0}, 200);
+            particles.nbodyGravity();
+            particles.draw(mvp, MatrixID);
+            particles.print();
 
 		// Swap buffers
 		glfwSwapBuffers(window);

@@ -24,11 +24,15 @@ class Particle
             float r = rand();
             r = r/ (float) RAND_MAX;
             _color[i] = r;
-            _location[i] = r*7-5;
+            _location[i] = r*40-20;
             _origin = _location;
+            _velocity = glm::normalize(glm::cross(vec{_location[0], _location[1], 0.0}, vec{0.0,0.0,1.0}))*0.5f;
+//            _velocity = _location/(float)100.0;
 //            _mass = r*100;
-            _mass = r*10 + 200;
+            _mass = r*10 + 100;
+//            _mass = 200;
         }
+        _location[2] = 0.0;
     }
 
     ~Particle() = default;
@@ -38,6 +42,11 @@ class Particle
 
     //move constructor and assignment not necessary, because so small
     //yeah but if I make a ton of them?
+    
+//    bool operator==(const self_t & other) const
+//    {
+//        return (this == &other || this.)
+//    }
 
     vec origin() const
     {
@@ -52,6 +61,11 @@ class Particle
     vec acceleration() const
     {
         return _acceleration;
+    }
+
+    float mass() const
+    {
+        return _mass;
     }
     
     void clear() //clear acceleration before next frame (accumulative)
@@ -79,7 +93,6 @@ class Particle
     void applyForce(glm::vec3 force)
     {
         force /= _mass; //f = m*a
-        //change is not persistent for some reason?????
         _acceleration += force;
     }
 
