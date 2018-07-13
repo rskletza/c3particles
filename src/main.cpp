@@ -96,7 +96,7 @@ int main( void )
 	
 	// Camera matrix
 	glm::mat4 View       = glm::lookAt(
-								glm::vec3(0,0,-500), // Camera is at (x,y,z), in World Space
+								glm::vec3(0,0,-200), // Camera is at (x,y,z), in World Space
 								glm::vec3(0,0,0), // and looks at the origin
 								glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
 						   );
@@ -109,7 +109,7 @@ int main( void )
     std::srand(std::time(nullptr));
     int width, height;
     double xpos, ypos;
-    ParticleSystem particles(20);
+    ParticleSystem particles(50);
 
 	do{
         //clear the screen and clear the depth
@@ -137,22 +137,26 @@ int main( void )
         
 
 
+        //physics engine in own thread --> sleep 
+        //measure time since last swap buffers (std::chrono)
         vec3 random = {rand()/(float)RAND_MAX,rand()/(float)RAND_MAX,rand()/(float)RAND_MAX};
 
 //            particles.applyForceAll(vec3(0.01,0.0,0.0));
             if(mousedown)
-                particles.addAttractor(vec3(-xpos, -ypos, 0.0), 0.01);
+                particles.addAttractor(vec3(-xpos, -ypos, 0.0), 1.0);
 //            else
 //                particles.gravitateOrigin(0.7);
 //               particles.applyForceAll(random);
 
-//            particles.addAttractor(vec3{0,0,0}, 0.01);
-            particles.addGForce(vec3{0,0,0}, 200);
-            particles.nbodyGravity();
+            particles.addAttractor(vec3{0,0,0}, 0.01);
+//            particles.addGForce(vec3{10,0,0}, 300);
+//            particles.addGForce(vec3{-10,0,0}, 100);
+//            particles.nbodyGravity();
             particles.draw(mvp, MatrixID);
             particles.print();
 
 		// Swap buffers
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 

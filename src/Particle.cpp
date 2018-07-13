@@ -29,7 +29,7 @@ class Particle
             _velocity = glm::normalize(glm::cross(vec{_location[0], _location[1], 0.0}, vec{0.0,0.0,1.0}))*0.5f;
 //            _velocity = _location/(float)100.0;
 //            _mass = r*100;
-            _mass = r*10 + 100;
+            _mass = r*10 + 200;
 //            _mass = 200;
         }
         _location[2] = 0.0;
@@ -73,8 +73,10 @@ class Particle
         _acceleration = glm::vec3(0.0, 0.0, 0.0);
     }
 
+    //deltaT will be 1 because calculation is based on frames (and frames are run at 60Hz)
     void update(float deltaT) //float because glm::vec3 can't deal with double
     {
+        deltaT = 1.0;
         //v(t)= Int(acc) = acc*t + C
         //C is the integration constant, which is the velocity at the previous point in time
         //--> v(t) = a*t + v(t-1)
@@ -90,18 +92,14 @@ class Particle
     }
     
     //apply a force (jerk)
+    //should be a free function TODO
+    //concept von etwas, worauf gravitation wirken kann
+    //separate class for projection
+    //partikel: zustand eines einzelnen partikels erhalten
     void applyForce(glm::vec3 force)
     {
         force /= _mass; //f = m*a
         _acceleration += force;
-    }
-
-    void gravitate(vec point, double strength)
-    {
-        vec dir = point - _location;
-        glm::normalize(dir);
-        dir *= strength;
-        applyForce(dir);
     }
 
     //write location to vertex buffer (only works for single vertex particles)

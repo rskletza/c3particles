@@ -16,7 +16,7 @@ class ParticleSystem
     ParticleSystem() = delete;
 
     ParticleSystem(size_t size)
-        :_G(1.0*std::pow(10,-10)) //universal gravitational constant (actually 6.67*10^-11)
+        :_G(1.0*std::pow(10,-2)) //universal gravitational constant (actually 6.67*10^-11)
     {
         std::cout << "ParticleSystem constructor called" << std::endl;
         //_particles = new std::vector<Particle>(size, Particle());
@@ -104,10 +104,9 @@ class ParticleSystem
                 if(p.location() == other.location())
                     continue;
                 direction = other.location()-p.location();
-//                gforce = _G*(p.mass()*other.mass())/pow(glm::length(direction),2);
+                gforce = _G*(p.mass()*other.mass())/pow(glm::length(direction),2);
             }
-            //p.applyForce(gforce*(glm::normalize(direction)));
-            p.applyForce(gforce*(direction));
+            p.applyForce(gforce*(glm::normalize(direction)));
         }
     }
 
