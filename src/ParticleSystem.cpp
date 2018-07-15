@@ -1,10 +1,20 @@
-#include "Particle.cpp"
+//#include "ParticleSystem.h"
+
 #include <vector>
 #include <array>
 #include <iostream>
 #include <cmath>
 
+#include "Particle.cpp"
+
 namespace c3p {
+
+//some sites I used to brush up on my physics knowledge:
+//http://www.pas.rochester.edu/~blackman/ast104/newton3laws16.html
+//https://www.johannes-strommer.com/rechner/basics-mathe-mechanik/ruck-beschleunigung-geschwindigkeit-weg/#beispiel
+//http://zonalandeducation.com/mstm/physics/mechanics/forces/newton/mightyFEqMA/mightyFEqMA.html
+//http://physics.weber.edu/amiri/physics1010online/WSUonline12w/OnLineCourseMovies/CircularMotion&Gravity/reviewofgravity/ReviewofGravity.html
+//http://www.physicsclassroom.com/class/waves/Lesson-0/Motion-of-a-Mass-on-a-Spring
 
 class ParticleSystem
 {

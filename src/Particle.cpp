@@ -1,7 +1,10 @@
 //#ifndef CPPPC_PROJECT__PARTICLE_H_INCLUDED
+//#include "Particle.h"
+
+#include <iostream>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
 
 namespace c3p {
 
