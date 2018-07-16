@@ -46,10 +46,10 @@ class ParticleContainer
           , _index(index)
         {   }
 
-        Iterator(const & iterator other)
-          : _container(other._container)
-          , _index(other._index)
-        {   }
+//        Iterator(const & iterator other)
+//          : _container(other._container)
+//          , _index(other._index)
+//        {   }
 
         ~Iterator() = default;
 
@@ -209,16 +209,6 @@ class ParticleContainer
         return _elements->size();
     }
 
-    iterator begin() const
-    {
-        return iterator(this, 0);
-    }
-
-    iterator end() const
-    {
-        return iterator(this, size());
-    }
-
     template<class T>
     void add(T && object)
     {
@@ -237,7 +227,7 @@ class ParticleContainer
     iterator remove(iterator & it)
     {
         _elements->erase(it);
-        return it; //because this is a contiguous container it now points to the next element
+        return it; //because this is a contiguous container it now points to the 
     }
 
   private:

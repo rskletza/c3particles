@@ -11,18 +11,16 @@
 #include <GL/glew.h>
 
 #include <GLFW/glfw3.h>
-GLFWwindow* window;
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <common/shader.hpp>
-//#include <common/controls.hpp>
-//#include <src/Particle.cpp>
-#include <src/ParticleSystem.cpp>
+#include "common/shader.hpp"
+#include "src/particle_system.h"
+#include "src/particle_renderer.h"
+//#include "src/particle_container.h"
 
-using namespace glm;
-using namespace c3p;
+GLFWwindow* window;
 
 bool mousedown; //TODO eek no global variables!
 
@@ -109,7 +107,11 @@ int main( void )
     std::srand(std::time(nullptr));
     int width, height;
     double xpos, ypos;
-    ParticleSystem particles(50);
+    c3p::ParticleSystem particles(50);
+    particles.setRandom();
+    c3p::ParticleRenderer p_renderer(particles);
+
+//    auto pc = c3p::ParticleContainer<c3p::Particle>(); 
 
 	do{
         //clear the screen and clear the depth
@@ -139,20 +141,21 @@ int main( void )
 
         //physics engine in own thread --> sleep 
         //measure time since last swap buffers (std::chrono)
-        vec3 random = {rand()/(float)RAND_MAX,rand()/(float)RAND_MAX,rand()/(float)RAND_MAX};
+        glm::vec3 random = {rand()/(float)RAND_MAX,rand()/(float)RAND_MAX,rand()/(float)RAND_MAX};
 
 //            particles.applyForceAll(vec3(0.01,0.0,0.0));
             if(mousedown)
-                particles.addAttractor(vec3(-xpos, -ypos, 0.0), 1.0);
+                particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);
 //            else
 //                particles.gravitateOrigin(0.7);
 //               particles.applyForceAll(random);
 
-            particles.addAttractor(vec3{0,0,0}, 0.01);
-//            particles.addGForce(vec3{10,0,0}, 300);
-//            particles.addGForce(vec3{-10,0,0}, 100);
+//            particles.addAttractor(glm::vec3{0.0,0,0}, 0.01);
+            particles.addGForce(glm::vec3{0,0,0}, 200);
+//            particles.addGForce(glm::vec3{-50,0,0}, 50);
 //            particles.nbodyGravity();
-            particles.draw(mvp, MatrixID);
+            particles.update();
+            p_renderer.render(mvp, MatrixID);
             particles.print();
 
 		// Swap buffers
