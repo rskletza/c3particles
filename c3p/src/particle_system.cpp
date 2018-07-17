@@ -166,6 +166,14 @@ void ParticleSystem::print() const {
   }
 }
 
+#if TODO
+std::ostream & operator<<(std::ostream & os, const ParticleSystem & ps) {
+  for (const auto & p : ps.particles()) {
+    os << p;
+  }
+}
+#endif
+
 size_t ParticleSystem::size() const { return _particles->size(); }
 
 bool ParticleSystem::empty() const { return _particles->empty(); }

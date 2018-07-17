@@ -27,7 +27,7 @@ add_definitions(
 
 # User playground
 add_executable(
-  c3p.bin
+  main
 	src/main.cpp
   src/particle_system.cpp
   src/particle_renderer.cpp
