@@ -15,10 +15,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "common/shader.hpp"
-#include "include/particle_system.h"
-#include "include/particle_renderer.h"
-//#include "src/particle_container.h"
+#include <c3p/common/shader.h>
+#include <c3p/particle_system.h>
+#include <c3p/particle_renderer.h>
 
 GLFWwindow* window;
 

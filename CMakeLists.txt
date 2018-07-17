@@ -16,8 +16,8 @@ if( CMAKE_BINARY_DIR MATCHES " " )
 endif()
 
 
-# Compile external dependencies 
-add_subdirectory (external)
+# Compile external dependencies
+# add_subdirectory (external)
 
 ## On Visual 2005 and above, this module can set the debug working directory
 #cmake_policy(SET CMP0026 OLD)
@@ -32,11 +32,11 @@ add_subdirectory (external)
 
 
 include_directories(
-	external/glfw-3.1.2/include/
-	external/glm-0.9.7.1/
-	external/glew-1.13.0/include/
-	.
-    include/
+# external/glfw-3.1.2/include/
+# external/glm-0.9.7.1/
+# external/glew-1.13.0/include/
+# .
+  include/
 )
 
 set(ALL_LIBS
@@ -54,12 +54,12 @@ add_definitions(
 )
 
 # User playground
-add_executable(main 
+add_executable(main
 	src/main.cpp
-    src/particle_system.cpp
-    src/particle_renderer.cpp
-	common/shader.cpp
-	common/shader.hpp
+  src/particle_system.cpp
+  src/particle_renderer.cpp
+  src/common/shader.cpp
+  src/common/shader.hpp
 )
 target_link_libraries(main
 	${ALL_LIBS}
