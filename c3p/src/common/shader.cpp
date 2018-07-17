@@ -1,4 +1,5 @@
-//copied from opengltutorials
+// copied from opengltutorials
+
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -6,6 +7,7 @@
 #include <fstream>
 #include <algorithm>
 #include <sstream>
+
 using namespace std;
 
 #include <stdlib.h>
@@ -13,7 +15,8 @@ using namespace std;
 
 #include <GL/glew.h>
 
-#include "shader.hpp"
+#include <c3p/common/shader.h>
+
 
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
 
