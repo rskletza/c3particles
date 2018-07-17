@@ -36,6 +36,7 @@ include_directories(
 	external/glm-0.9.7.1/
 	external/glew-1.13.0/include/
 	.
+    include/
 )
 
 set(ALL_LIBS
@@ -55,6 +56,8 @@ add_definitions(
 # User playground
 add_executable(main 
 	src/main.cpp
+    src/particle_system.cpp
+    src/particle_renderer.cpp
 	common/shader.cpp
 	common/shader.hpp
 )

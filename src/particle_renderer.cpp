@@ -1,29 +1,26 @@
-#include "src/particle_renderer.h"
+#include "include/particle_renderer.h"
 
 #include <algorithm>
 
 namespace c3p {
 
-class ParticleSystem;
+    class ParticleSystem;
 
-class ParticleRenderer
-{
     using ParticleContainer = std::vector<Particle>;
 
-  public:
-    ParticleRenderer() = delete;
+//    ParticleRenderer::ParticleRenderer() = delete;
 
-    ParticleRenderer(const ParticleSystem & ps)
+    ParticleRenderer::ParticleRenderer(const ParticleSystem & ps)
       : _particlecontainer(ps._particles)
     {   }
 
-    ~ParticleRenderer() = default;
+    ParticleRenderer::~ParticleRenderer() = default;
 
     //assignment and comparison should not be needed since there should always only be one renderer per particle system
     //should the renderer then be a member of the particle system?
     
     //calculate color and vertex buffers for each particle and pass them to OpenGL
-    void render(glm::mat4 & mvp, GLuint MatrixID)
+    void ParticleRenderer::render(glm::mat4 & mvp, GLuint MatrixID)
     {
         //for each particle. for now will use 
         for(Particle & p : *_particlecontainer)
@@ -32,18 +29,18 @@ class ParticleRenderer
             GLuint vertexbuffer; 
 
             //void fillVertexBuffer()
-            GLfloat buffer_data[3] = {p.location[0], p.location[1], p.location[2]};
+            GLfloat vertex_buffer_data[3] = {p.location[0], p.location[1], p.location[2]};
             glGenBuffers(1, &vertexbuffer);
             glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_data), vertex_buffer_data, GL_STATIC_DRAW);
         
             //void fillColorBuffer()
-            GLfloat buffer_data[3] = {p.color[0], p.color[1], p.color[2]};
+            GLfloat color_buffer_data[3] = {p.color[0], p.color[1], p.color[2]};
             glGenBuffers(1, &colorbuffer);
             glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(buffer_data), buffer_data, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
             glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, _vertexbuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
             glVertexAttribPointer(
                0,                  // attribute 0. must match the layout in the shader.
                3,                  // size
@@ -55,7 +52,7 @@ class ParticleRenderer
             
             // 2nd attribute buffer : colors
             glEnableVertexAttribArray(1);
-            glBindBuffer(GL_ARRAY_BUFFER, _colorbuffer);
+            glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
             glVertexAttribPointer(
                 1,                  // attribute. must match the layout in the shader.
                 3,                  // size
@@ -72,9 +69,5 @@ class ParticleRenderer
         }
         
     }
-
-  private:
-    ParticleContainer * _particlecontainer;    
-};
 
 } //namespace c3p

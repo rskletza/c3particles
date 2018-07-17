@@ -1,42 +1,34 @@
-//#include "ParticleSystem.h"
+#include "include/particle_system.h"
 
 #include <vector>
 #include <iostream>
 #include <cmath>
 
-#include "src/particle_system.h"
-
 namespace c3p {
-    
-//some sites I used to brush up on my physics knowledge:
-//http://www.pas.rochester.edu/~blackman/ast104/newton3laws16.html
-//https://www.johannes-strommer.com/rechner/basics-mathe-mechanik/ruck-beschleunigung-geschwindigkeit-weg
-//http://zonalandeducation.com/mstm/physics/mechanics/forces/newton/mightyFEqMA/mightyFEqMA.html
-//http://physics.weber.edu/amiri/physics1010online/WSUonline12w/OnLineCourseMovies/CircularMotion&Gravity/reviewofgravity/ReviewofGravity.html
-//http://www.physicsclassroom.com/class/waves/Lesson-0/Motion-of-a-Mass-on-a-Spring
 
-//apply a force
-//concept von etwas, worauf gravitation wirken kann
-void applyForce(glm::vec3 force, Particle & p)
-{
-    force /= p.mass; //f = m*a
-    p.acceleration += force;
-}
-
-class ParticleSystem
-{
     using ParticleContainer = std::vector<Particle>;
     using vec = glm::vec3; //std::array<float, 3>;
     using self_t = ParticleSystem;
+    
+    //some sites I used to brush up on my physics:
+    //http://www.pas.rochester.edu/~blackman/ast104/newton3laws16.html
+    //https://www.johannes-strommer.com/rechner/basics-mathe-mechanik/ruck-beschleunigung-geschwindigkeit-weg
+    //http://zonalandeducation.com/mstm/physics/mechanics/forces/newton/mightyFEqMA/mightyFEqMA.html
+    //http://physics.weber.edu/amiri/physics1010online/WSUonline12w/OnLineCourseMovies/CircularMotion&Gravity/reviewofgravity/ReviewofGravity.html
+    //http://www.physicsclassroom.com/class/waves/Lesson-0/Motion-of-a-Mass-on-a-Spring
 
-    friend ParticleRenderer; //TODO find something better than friend
+    //apply a force
+    //Particle implements a concept of an object that is subject to gravitation
+    void applyForce(glm::vec3 force, Particle & p)
+    {
+        force /= p.mass; //f = m*a
+        p.acceleration += force; //add the force to the object's acceleration
+    }
 
-  public:
+    //ParticleSystem::ParticleSystem() = delete;
 
-    ParticleSystem() = delete;
-
-    ParticleSystem(size_t size)
-        :_G(1.0*std::pow(10,-2)) //universal gravitational constant (actually 6.67*10^-11)
+    ParticleSystem::ParticleSystem(size_t size)
+        :_G(1.0*std::pow(10,-4)) //universal gravitational constant (actually 6.67*10^-11)
     {
         std::cout << "ParticleSystem constructor called" << std::endl;
         //_particles = new std::vector<Particle>(size, Particle());
@@ -47,12 +39,12 @@ class ParticleSystem
         }
     }
 
-    ~ParticleSystem()
+    ParticleSystem::~ParticleSystem()
     {
         delete _particles;
     }
 
-    self_t operator=(const self_t & other)
+    self_t ParticleSystem::operator=(const self_t & other)
     {
         if (!empty())
         {
@@ -62,29 +54,14 @@ class ParticleSystem
 
     }
 
-    self_t operator=(self_t && other)
+    self_t ParticleSystem::operator=(self_t && other)
     {
         delete _particles;
         _particles = other._particles;
     }
 
-//    Particle & operator[](int index) const
-//    {
-//        return (*_particles)[index];
-//    }
-//
-//    Particle & operator[](int index) 
-//    {
-//        return (*_particles)[index];
-//    }
-
-    const ParticleContainer & readParticles() const
-    {
-        return *(_particles);
-    }
-
     //give each particle a random color and location. the velocity is set perpendicular to the location vector (this is what causes the circular movement around 0,0,0)
-    void setRandom()
+    void ParticleSystem::setRandom()
     {
         for(Particle & p : *_particles)
         {
@@ -95,14 +72,14 @@ class ParticleSystem
                 p.color[i] = r;
                 p.location[i] = r*40-20;
                 p.origin = p.location;
-                p.velocity = glm::normalize(glm::cross(vec{p.location[0], p.location[1], 0.0}, vec{0.0,0.0,1.0}))*0.5f;
+                p.velocity = glm::normalize(glm::cross(glm::vec3{p.location[0], p.location[1], 0.0}, glm::vec3{0.0,0.0,1.0}))*0.5f;
                 p.mass = r*10 + 200;
             }
             p.location[2] = 0.0;
         }
     }
 
-    void update() 
+    void ParticleSystem::update() 
     {
         //deltaT will be 1 because calculation is based on frames (and frames are run at 60Hz)
         float deltaT = 1.0;
@@ -128,7 +105,7 @@ class ParticleSystem
 
     //TODO pass a view of particles to apply this to
     //TODO perfect forwarding? Or maybe not since I need the force for each vector --> there has to be a better way to do this!
-    void applyForceAll(vec force) const
+    void ParticleSystem::applyForceAll(glm::vec3 force) const
     {
         for(Particle & p : *_particles)
         {
@@ -137,32 +114,32 @@ class ParticleSystem
     }
 
     //TODO generalize so that gravitate can also implement gravitateOrigin. Maybe with a range?
-    void addAttractor(vec point, double strength)
+    void ParticleSystem::addAttractor(glm::vec3 point, float strength) const
     {
         for(Particle & p : *_particles)
         {
-            vec force = glm::normalize(point - p.location) * strength;
+            glm::vec3 force = glm::normalize(point - p.location) * strength;
             applyForce(force, p);
         }
     }
 
     //enable origin force --> particles are attracted to their origin
-    void gravitateOrigin(float strength) const
+    void ParticleSystem::gravitateOrigin(float strength) const
     {
         for(Particle & p : *_particles)
         {
-            vec force = glm::normalize(p.origin - p.location) * strength;
+            glm::vec3 force = glm::normalize(p.origin - p.location) * strength;
             applyForce(force, p);
         }
     }
 
     //simulate gravitational forces on all the particles
-    void nbodyGravity() const
+    void ParticleSystem::nbodyGravity() const
     {
         for(Particle & p : *_particles)
         {
             float gforce;
-            vec direction;
+            glm::vec3 direction;
             for(Particle & other : *_particles)
             {
                 if(p.location == other.location)
@@ -177,23 +154,23 @@ class ParticleSystem
     }
 
     //stiff spring has high tension (spring constant)
-    void nbodySprings(float tension) 
+    void ParticleSystem::nbodySprings(float tension) const
     {
 
     }
 
-    void addGForce(vec position, float mass)
+    void ParticleSystem::addGForce(glm::vec3 position, float mass) const
     {
         for(Particle & p : *_particles)
         {
-            vec direction = glm::normalize(position - p.location);
+            glm::vec3 direction = glm::normalize(position - p.location);
             float gforce = _G*(p.mass * mass)/pow(glm::length(direction),2);
 
             applyForce(gforce * direction, p);
         }
     }
 
-    void print() const
+    void ParticleSystem::print() const
     {
         for (auto p : *_particles)
         {
@@ -207,28 +184,14 @@ class ParticleSystem
         }
     }
 
-//    void draw(glm::mat4 & mvp, GLuint MatrixID) const
-//    {
-//        for (Particle & p : *_particles)
-//        {
-//            p.draw(mvp, MatrixID);
-//        }
-//    }
-
-    size_t size() const
+    size_t ParticleSystem::size() const
     {
         return _particles->size();
     }
 
-    bool empty() const
+    bool ParticleSystem::empty() const
     {
-        return (size() == 0);
+        return _particles->empty();
     }
-
-  private:
-    ParticleContainer * _particles;
-    float _G;
-
-};
 
 } //namespace c3p

@@ -1,9 +1,13 @@
 #ifndef C3P__PARTICLE_SYSTEM__INCLUDED
 #define C3P__PARTICLE_SYSTEM__INCLUDED
 
-#include "src/particle_renderer.h"
+#include <vector>
+
+#include "include/particle_renderer.h"
 
 namespace c3p {
+
+class ParticleRenderer;
 
 //partikel: zustand eines einzelnen partikels erhalten
 struct Particle
@@ -39,8 +43,6 @@ class ParticleSystem
     self_t operator=(const self_t & other);
     self_t operator=(self_t && other);
 
-    const ParticleContainer & readParticles() const;
-
     //give each particle a random color and location. the velocity is set perpendicular to the location vector (this is what causes the circular movement around 0,0,0)
     void setRandom();
 
@@ -51,7 +53,7 @@ class ParticleSystem
     void applyForceAll(vec force) const;
 
     //add an attractor to the system. It attracts all the particles with constant strength
-    void addAttractor(vec point, double strength);
+    void addAttractor(vec point, float strength) const;
 
     //enable origin force --> particles are attracted to their origin
     void gravitateOrigin(float strength) const;
@@ -67,6 +69,10 @@ class ParticleSystem
 
     //print values of the particles
     void print() const;
+
+    bool empty() const;
+
+    size_t size() const;
 
   private:
     ParticleContainer * _particles;

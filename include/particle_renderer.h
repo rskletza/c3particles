@@ -1,21 +1,24 @@
 #ifndef C3P__PARTICLE_RENDERER__INCLUDED
 #define C3P__PARTICLE_RENDERER__INCLUDED
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <GL/glew.h>
 
-#include "src/particle_system.h"
+#include <glm/glm.hpp>
+
+#include "include/particle_system.h"
 
 //first, bind renderer to system
 //auto pr = ParticleRenderer(particlesystem);
 //
 //then render particles (fill color and vertex buffer for each particle
-//pr.render()
+//pass the model-view-projection matrix and handle for shaders
+//pr.render(mvp, MatrixID)
 
 namespace c3p {
 
 struct Particle; //TODO why isn't this clear from the particle_system header?
 class ParticleSystem;
+
 using ParticleContainer = std::vector<Particle>;
 
 class ParticleRenderer

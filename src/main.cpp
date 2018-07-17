@@ -16,8 +16,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "common/shader.hpp"
-#include "src/particle_system.h"
-#include "src/particle_renderer.h"
+#include "include/particle_system.h"
+#include "include/particle_renderer.h"
 //#include "src/particle_container.h"
 
 GLFWwindow* window;
@@ -84,7 +84,7 @@ int main( void )
 
     GLuint shaders = LoadShaders( "../shaders/simple_vert_shader.glsl", "../shaders/simple_frag_shader.glsl" );
     
-	// Get a handles for shaders
+	// Get a handle for shaders
 	GLuint MatrixID = glGetUniformLocation(shaders, "MVP");
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
@@ -103,11 +103,11 @@ int main( void )
 	// Our ModelViewProjection : multiplication of our 3 matrices
   glm::mat4 mvp        = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
-    glPointSize(10.0f);
+    glPointSize(5.0f);
     std::srand(std::time(nullptr));
     int width, height;
     double xpos, ypos;
-    c3p::ParticleSystem particles(50);
+    c3p::ParticleSystem particles(3);
     particles.setRandom();
     c3p::ParticleRenderer p_renderer(particles);
 
@@ -115,7 +115,8 @@ int main( void )
 
 	do{
         //clear the screen and clear the depth
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
         // Enable depth test
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -150,10 +151,10 @@ int main( void )
 //                particles.gravitateOrigin(0.7);
 //               particles.applyForceAll(random);
 
-//            particles.addAttractor(glm::vec3{0.0,0,0}, 0.01);
-            particles.addGForce(glm::vec3{0,0,0}, 200);
+//            particles.addAttractor(glm::vec3{0.0,0,0}, 1.0);
+            particles.addGForce(glm::vec3{0,0,0}, 20);
 //            particles.addGForce(glm::vec3{-50,0,0}, 50);
-//            particles.nbodyGravity();
+            particles.nbodyGravity();
             particles.update();
             p_renderer.render(mvp, MatrixID);
             particles.print();
