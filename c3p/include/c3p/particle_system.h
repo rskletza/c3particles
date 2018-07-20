@@ -4,14 +4,16 @@
 #include <vector>
 
 #include <c3p/particle_renderer.h>
+//#include <c3p/particle_container.h>
 
-namespace c3p {
-
+namespace c3p
+{
 class ParticleRenderer;
 
-// partikel: zustand eines einzelnen partikels erhalten
-struct Particle {
-  glm::vec3 color; // TODO: does this belong here?
+// Particle implements a concept of an object that is subject to forces (e.g gravitation)
+struct Particle
+{
+  glm::vec3 color;  // TODO: does this belong here?
   glm::vec3 origin;
   glm::vec3 location;
   glm::vec3 velocity;
@@ -20,18 +22,18 @@ struct Particle {
   float ttl;
 };
 
-// apply a force
-// concept von etwas, worauf gravitation wirken kann
+// Apply a force to a particle object
 void applyForce(glm::vec3 force, Particle &p);
 
-class ParticleSystem {
+class ParticleSystem
+{
   using ParticleContainer = std::vector<Particle>;
-  using vec = glm::vec3; // std::array<float, 3>;
+  using vec = glm::vec3;  // std::array<float, 3>;
   using self_t = ParticleSystem;
 
-  friend ParticleRenderer; // TODO find something better than friend
+  friend ParticleRenderer;  // TODO find something better than friend
 
-public:
+ public:
   ParticleSystem() = delete;
 
   ParticleSystem(size_t size);
@@ -74,11 +76,11 @@ public:
 
   size_t size() const;
 
-private:
+ private:
   ParticleContainer *_particles;
-  float _G; // the gravatational constant of the system
+  float _G;  // the gravatational constant of the system
 };
 
-} // namespace c3p
+}  // namespace c3p
 
 #endif

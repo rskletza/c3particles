@@ -1,237 +1,118 @@
-//#include "ParticleContainer.h"
+#ifndef C3P__PARTICLE_CONTAINER__INCLUDED
+#define C3P__PARTICLE_CONTAINER__INCLUDED
 
 #include <vector>
-#include <algorithm>
-#include <iostream>
+#include <iterator>
 
 #include <glm/glm.hpp>
 
-namespace c3p {
+namespace c3p
+{
+
+//forward declarations
+struct Particle;
+class ParticleContainer;
 
 using vec = glm::vec3;
 
-//struct Particle
-//{
-//    vec origin;
-//    vec location;
-//    vec velocity;
-//    vec acceleration;
-//    float mass;
-//    float ttl;
-//}
-
-//need iterators for algorithms
-//change name to NewtonianObjectContainer? Urgh
-template<class NewtonianObject>
 class ParticleContainer
 {
-    using self_t = ParticleContainer<NewtonianObject>;
-//    using value_t = Object;
-    using iterator = ParticleContainer<NewtonianObject>::Iterator;
+//  using iterator = std::iterator<std::random_access_iterator_tag, Particle, std::ptrdiff_t, Particle*, Particle&>;
 
-  public:
-    class Iterator
-    {
-      public:
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = NewtonianObject;
-        using difference_type = std::ptrdiff_t;
-        using pointer = value_type *;
-        using reference = value_type &;
+ public:
+  class iterator
+  {
+   public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = Particle;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type *;
+    using reference = value_type &;
+    using iterator_t = ParticleContainer::iterator;
 
-        Iterator() = default;
+    iterator() = default;
 
-        Iterator(ParticleContainer * container, size_t index)
-          : _container(container)
-          , _index(index)
-        {   }
+    iterator(ParticleContainer *container, size_t index);
+    
+    iterator(const & iterator_t other);
 
-//        Iterator(const & iterator other)
-//          : _container(other._container)
-//          , _index(other._index)
-//        {   }
+    ~iterator() = default;
 
-        ~Iterator() = default;
+    const reference operator*() const;
 
-        iterator & operator=(const & iterator other) = default;
+    reference operator*();
+    
+    const reference operator[](int offset) const;
+    
+    reference operator[](int offset);
 
-        const reference operator*() const
-        {
-            return _container[_index];
-        }
+    iterator_t &operator++();
 
-        reference operator*()
-        {
-            return _container[_index];
-        }
+    iterator_t &operator++(int);
 
-        const reference operator[](int offset) const
-        {
-            return *(*this + offset);
-        }
+    iterator_t &operator--();
 
-        reference operator[](int offset) 
-        {
-            return *(*this + offset);
-        }
+    iterator_t &operator--(int);
 
-        iterator & operator++() 
-        {
-            ++_index;
-            return *this;
-        }
+    iterator_t &operator+=(int offset);
 
-        iterator & operator++(int) 
-        {
-            iterator old = *this;
-            ++(*this);
-            return old;
-        }
+    iterator_t &operator-=(int offset);
 
-        iterator & operator--() 
-        {
-            --_index;
-            return *this;
-        }
+    iterator_t &operator+(int offset) const;
 
-        iterator & operator--(int) 
-        {
-            iterator old = *this;
-            --(*this);
-            return old;
-        }
+    iterator_t &operator-(int offset) const;
 
-        iterator & operator+=(int offset)
-        {
-            _index += offset;
-            return *this;
-        }
+    difference_type operator-(const iterator_t &other);
 
-        iterator & operator-=(int offset)
-        {
-            _index -= offset;
-            return *this;
-        }
+    bool operator==(const iterator_t &other) const;
 
-        iterator & operator+(int offset) const
-        {
-            return (*this)[offset];
-        }
+    bool operator!=(const iterator_t &other) const;
+    // we'll see if we need comparisons
 
-        iterator & operator-(int offset) const
-        {
-            return (*this)[-offset];
-        }
+   private:
+    ParticleContainer *_container;
+    size_t _index;
+  };
 
-        difference_type operator-(const iterator & other)
-        {
-            return (_index - other._index);
-        }
+ public:
+  using iterator = ParticleContainer::iterator;
+  using self_t = ParticleContainer;
 
-        bool operator==(const iterator & other)
-        {
-            return (this == &other || 
-                    (_container == other._container && _index == other.index));
-        }
+  ParticleContainer();
 
-        bool operator!=(const iterator & other)
-        {
-            return !(&this == other);
-        }
+  ParticleContainer(size_t size);
 
-        //we'll see if we need comparisons
+  ParticleContainer(const self_t &other);
 
-      private:
-        ParticleContainer * _container;
-        size_t _index;
-    }
+  ParticleContainer(self_t &&other);
 
-    ParticleContainer()
-    {
-        _elements = new std::vector<Particle>;
-    }
+  ~ParticleContainer();
 
-    ParticleContainer(size_t size)
-    {
-        //TODO initialize with constructor!
-        _elements = new std::vector<NewtonianObject>(size, NewtonianObject());
-//        std::generate() 
-    }
+  self_t operator=(const self_t &rhs);
 
-    ParticleContainer(const self_t & other)
-    {
-        _elements = new std::vector<NewtonianObject>(other._elements);
-    }
+  self_t operator=(self_t &&rhs);
 
-    ParticleContainer(self_t && other)
-    {
-        _elements = other._elements;
-        other._elements = nullptr;
-    }
+  bool operator==(self_t &rhs) const;
 
-    ~ParticleContainer()
-    {
-        delete[] _elements;
-    }
+  bool operator!=(self_t &rhs) const;
 
-    self_t operator=(const self_t & rhs)
-    {
-        _elements.resize(rhs.size());
-        std::copy(rhs.begin(), rhs.end(), (*this).begin);
-    }
+  bool empty() const;
 
-    self_t operator=(self_t && rhs)
-    {
-        delete[] _elements;
-        _elements = rhs._elements;
-        rhs._elements = nullptr;
-    }
+  bool size() const;
 
-    bool operator==(self_t & rhs) const
-    {
-        return (this == &rhs || 
-                _elements == rhs._elements || 
-                std::equal(_elements->begin(), _elements->end(), rhs.begin()));
-    }
+  iterator begin() const;
 
-    bool operator!=(self_t & rhs) const
-    {
-        return !(*this != rhs);
-    }
+  //TODO add perfect forwarding
+  iterator add(Particle p);
 
-    bool empty() const
-    {
-        return _elements->empty();
-    }
+  iterator add(size_t count);
 
-    bool size() const
-    {
-        return _elements->size();
-    }
+  iterator remove(iterator &it);
 
-    template<class T>
-    void add(T && object)
-    {
-        _elements->push_back(std::forward<T>(object));
-    }
-
-    iterator add(size_t count)
-    {
-        for(;count!=0;--count)
-        {
-            _elements->emplace(this->end())
-        }
-        return iterator(this, size())
-    }
-
-    iterator remove(iterator & it)
-    {
-        _elements->erase(it);
-        return it; //because this is a contiguous container it now points to the 
-    }
-
-  private:
-    std::vector<NewtonianObject> * _elements;
+ private:
+  std::vector<Particle> *_elements;
 };
 
-} //namespace c3p
+}  // namespace c3p
+
+#endif //C3P__PARTICLE_CONTAINER__INCLUDED

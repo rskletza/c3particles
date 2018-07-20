@@ -14,15 +14,16 @@
 // pass the model-view-projection matrix and handle for shaders
 // pr.render(mvp, MatrixID)
 
-namespace c3p {
-
-struct Particle; // TODO why isn't this clear from the particle_system header?
+namespace c3p
+{
+struct Particle;  // TODO why isn't this clear from the particle_system header?
 class ParticleSystem;
 
-using ParticleContainer = std::vector<Particle>;
+using ParticleContainerFk = std::vector<Particle>;
 
-class ParticleRenderer {
-public:
+class ParticleRenderer
+{
+ public:
   ParticleRenderer() = delete;
   ParticleRenderer(const ParticleSystem &);
   ~ParticleRenderer();
@@ -35,10 +36,10 @@ public:
   /// OpenGL
   void render(glm::mat4 &mvp, GLuint MatrixID);
 
-private:
-  ParticleContainer *_particlecontainer;
+ private:
+  ParticleContainerFk *_particlecontainer;
 };
 
-} // namespace c3p
+}  // namespace c3p
 
-#endif // C3P__PARTICLE_RENDERER__INCLUDED
+#endif  // C3P__PARTICLE_RENDERER__INCLUDED

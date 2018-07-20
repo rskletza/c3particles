@@ -2,38 +2,50 @@ project (c3p)
 
 find_package(OpenGL REQUIRED)
 
+#use pkgconfig to detect gtk headers/library files
+find_package(PkgConfig REQUIRED)
+PKG_CHECK_MODULES(GTK REQUIRED gtk+-3.0)
+
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
+
 include_directories(
-# external/glfw-3.1.2/include/
-# external/glm-0.9.7.1/
-# external/glew-1.13.0/include/
-# .
+  ${GTK_INCLUDE_DIRS}
   include/
 )
 
+link_directories(
+  ${GTK_LIBRARY_DIRS}
+  )
+
 set(ALL_LIBS
-	${OPENGL_LIBRARY}
-	glfw
-  GLEW
-#	GLEW_1130
+    ${OPENGL_LIBRARY}
+    glfw
+    GLEW
 )
 
 add_definitions(
-	-DTW_STATIC
-	-DTW_NO_LIB_PRAGMA
-	-DTW_NO_DIRECT3D
-	-DGLEW_STATIC
-	-D_CRT_SECURE_NO_WARNINGS
+    -DTW_STATIC
+    -DTW_NO_LIB_PRAGMA
+    -DTW_NO_DIRECT3D
+    -DGLEW_STATIC
+    -D_CRT_SECURE_NO_WARNINGS
+    ${GTK_CFLAGS_OTHER}
 )
 
-# User playground
 add_executable(
-  main
-	src/main.cpp
-  src/particle_system.cpp
-  src/particle_renderer.cpp
-  src/common/shader.cpp
+    main
+    src/main.cc
+    src/particle_system.cc
+    src/particle_renderer.cc
+    #    src/particle_container.cc
+    src/common/shader.cc
 )
+
 target_link_libraries(main
+  ${GTK_LIBRARIES}
+  Threads::Threads
 	${ALL_LIBS}
 )
 
