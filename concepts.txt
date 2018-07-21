@@ -28,8 +28,12 @@ valid expressions of the particle system are:
 | operator<<(force, p)           |              |                                                                     |
 +--------------------------------+--------------+---------------------------------------------------------------------+
 
-there are two kinds of basic expressions: one kind returns a force and the other applies a force
+There are two kinds of basic expressions: one kind returns a force and the other applies a force.
 
+Naturally, expressions like n_gravitational_force etc can be generalized to n_ftype_force. It would be interesting to maybe define the relationship in the expression
 
+eg for gravity: F = m1*m2/d^2, so the expression would be: n_force(p, P, FF) FF being the force function
 
-
+external_force could also be defined accordingly: external_force(p, FF)
+probably mostly would be F = m*a
+not sure if this is a good idea
