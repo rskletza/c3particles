@@ -1,9 +1,13 @@
 Formal definition of a particle system:
   set of particles P and influencing forces
-  for discrete time steps, diverse forces influence the position of the particles
-    --> for each time step, the particle system calculates the forces for each particle and updates its position
+  for discrete time steps, diverse forces influence the position of the
+  particles
+    --> for each time step, the particle system calculates the forces for
+        each particle and updates its position
 
-A force can be described as a three-dimensional vector, whose direction is equal to the direction of the force, and whose length is equal to the magnitude of the force
+A force can be described as a three-dimensional vector, whose direction is
+equal to the direction of the force, and whose length is equal to the
+magnitude of the force
 
 There are two types of forces:
   external forces (forces originating outside of the particle system)
@@ -11,28 +15,41 @@ There are two types of forces:
 
 valid expressions of the particle system are:
 
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| expression                     | returns      | explanation                                                         |
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| inherent_force(p)              | force vector | the force a particle has at a given time                            |
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| n_gravitational_force(p, P, G) | force vector | the sum of all inter-particle gravitational forces on a particle p. |
-|                                |              | P denotes the set of particles and G the gravitational constant     |
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| n_spring_force(p, P, S)        | force vector | the sum of all inter-particle forces with a spring S                |
-|                                |              | connecting p to all particles in P                                  |
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| external_force(force)          | force vector | creates an external force                                           |
-+--------------------------------+--------------+---------------------------------------------------------------------+
-| apply_force(force, p)          | updated p    | applies a force to the particle and returns the particle            |
-| operator<<(force, p)           |              |                                                                     |
-+--------------------------------+--------------+---------------------------------------------------------------------+
++------------------------------------+--------------+---------------------------------------------------------------------+
+| expression                         | returns      | explanation                                                         |
++------------------------------------+--------------+---------------------------------------------------------------------+
+| inherent_force(p)                  | force vector | the force a particle has at a given time                            |
++------------------------------------+--------------+---------------------------------------------------------------------+
+| accum_gravitational_force(p, P, G) | force vector | the sum of all inter-particle gravitational forces on a particle p. |
+|                                    |              | P denotes the set of particles and G the gravitational constant     |
++------------------------------------+--------------+---------------------------------------------------------------------+
+| accum_spring_force(p, P, S)        | force vector | the sum of all inter-particle forces with a spring S                |
+|                                    |              | connecting p to all particles in P                                  |
++------------------------------------+--------------+---------------------------------------------------------------------+
+| make_force(force)                  | force vector | creates an external force                                           |
++------------------------------------+--------------+---------------------------------------------------------------------+
+| apply_force(force, p)              | updated p    | applies a force to the particle and returns the particle            |
+| operator<<(force, p)               |              |                                                                     |
++------------------------------------+--------------+---------------------------------------------------------------------+
 
-There are two kinds of basic expressions: one kind returns a force and the other applies a force.
+Questions / Remarks:
 
-Naturally, expressions like n_gravitational_force etc can be generalized to n_ftype_force. It would be interesting to maybe define the relationship in the expression
+- If something is created, the function should have prefix `make_` or
+  `create_`.
+- What does "create an external force" mean? `make_force` expects a force,
+  what is the parameter?
+- Why not a single `accumulate_force` for all force categories?
 
-eg for gravity: F = m1*m2/d^2, so the expression would be: n_force(p, P, FF) FF being the force function
+
+There are two kinds of basic expressions: one kind returns a force and the
+other applies a force.
+
+Naturally, expressions like n_gravitational_force etc can be generalized
+to n_ftype_force. It would be interesting to maybe define the relationship
+in the expression
+
+eg for gravity: F = m1*m2/d^2, so the expression would be: n_force(p, P, FF)
+FF being the force function
 
 external_force could also be defined accordingly: external_force(p, FF)
 probably mostly would be F = m*a
