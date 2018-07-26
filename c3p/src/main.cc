@@ -39,15 +39,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 int main(void)
 {
   ControlData * ctl_p; //struct to hold the data from the control window
-  ControlData ctl = {.scale1 = 0};
+  struct ControlData ctl;
   ctl_p = &ctl;
+  initControls(ctl_p);
 
   std::thread ctl_window ([ctl_p]{
     GtkApplication *app;
     int status;
 
     app = gtk_application_new("org.gtk.example", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect(app, "activate", G_CALLBACK (activate), ctl_p);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), (gpointer)ctl_p);
     status = g_application_run(G_APPLICATION (app), 0, nullptr);
     g_object_unref(app);
       });
@@ -130,22 +131,25 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       Model;  // Remember, matrix multiplication is the other way around
 
   glPointSize(5.0f);
-  std::srand(std::time(nullptr));
   int width, height;
   double xpos, ypos;
-  c3p::ParticleSystem particles(100);
+  c3p::ParticleSystem particles(3);
   particles.setRandom();
   c3p::ParticleRenderer p_renderer(particles);
+
+//  c3p::ParticleSystem particles2(100);
+//  particles2.setRandom();
+//  c3p::ParticleRenderer p_renderer2(particles2);
 
 //  auto pc = c3p::ParticleContainer();
 
   do
     {
 
-      //std::cout << ctl_p->scale1 << std::endl;
+//      std::cout << ctl_p->zoom_scale << std::endl;
       // clear the screen and clear the depth
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      //glClear(GL_DEPTH_BUFFER_BIT);
+      //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glClear(GL_DEPTH_BUFFER_BIT);
       // Enable depth test
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
@@ -173,7 +177,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
                           rand() / (float)RAND_MAX};
 
       //            particles.applyForceAll(vec3(0.01,0.0,0.0));
-      if (mousedown) particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);
+      if (mousedown) {particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);}
       //            else
       //                particles.gravitateOrigin(0.7);
       //               particles.applyForceAll(random);
@@ -184,6 +188,12 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       particles.nbodyGravity();
       particles.update();
       p_renderer.render(mvp, MatrixID);
+
+//      particles2.addGForce(glm::vec3{0, 0, 0}, 100);
+//      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
+//      particles2.nbodyGravity();
+//      particles2.update();
+//      p_renderer2.render(mvp, MatrixID);
 //      particles.print();
 
       // Swap buffers

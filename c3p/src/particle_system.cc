@@ -2,6 +2,7 @@
 #include <c3p/particle_system.h>
 
 #include <cmath>
+#include <ctime>
 #include <iostream>
 #include <vector>
 
@@ -68,6 +69,7 @@ self_t ParticleSystem::operator=(self_t &&other)
 // movement around 0,0,0)
 void ParticleSystem::setRandom()
 {
+  std::srand(std::time(nullptr));
   for (Particle &p : *_particles)
     {
       for (int i = 0; i < 3; ++i)
@@ -81,13 +83,14 @@ void ParticleSystem::setRandom()
           //    if(r>0.5) { p.location[1] = 0.0;}
           //    else {p.location[0] = 0.0;}
         }
-          p.origin = p.location;
-          p.velocity = glm::normalize(glm::cross(
-                           glm::vec3{p.location[0], p.location[1], 0.0},
-                           glm::vec3{0.0, 0.0, 1.0}))
-                        * 0.5f;
-//          p.velocity = glm::normalize(glm::vec3{p.location[0], p.location[1], 0.0}) * -1.0f;
-          p.location[2] = 0.0;
+      p.origin = p.location;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.5f;
+      //          p.velocity = glm::normalize(glm::vec3{p.location[0],
+      //          p.location[1], 0.0}) * -1.0f;
+      p.location[2] = 0.0;
     }
 }
 

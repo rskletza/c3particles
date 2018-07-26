@@ -2,25 +2,25 @@
 
 #include <algorithm>
 #include <iostream>
-#include <vector>
 #include <iterator>
+#include <vector>
 
 #include <glm/glm.hpp>
 
-#include <c3p/particle_system.h> //needed for struct Particle
+#include <c3p/particle_system.h>  //needed for struct Particle
 
 namespace c3p
 {
 using vec = glm::vec3;
 using self_t = ParticleContainer;
-//using iterator = ParticleContainer::iterator;
+// using iterator = ParticleContainer::iterator;
 
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type = Particle;
-    using difference_type = std::ptrdiff_t;
-    using pointer = value_type *;
-    using reference = value_type &;
-    using iterator_t = ParticleContainer::iterator;
+using iterator_category = std::random_access_iterator_tag;
+using value_type = Particle;
+using difference_type = std::ptrdiff_t;
+using pointer = value_type *;
+using reference = value_type &;
+using iterator_t = ParticleContainer::iterator;
 
 ParticleContainer::iterator::iterator(ParticleContainer *container,
                                       size_t index)
@@ -174,13 +174,9 @@ bool ParticleContainer::operator!=(self_t &rhs) const
 }
 
 bool ParticleContainer::empty() const { return _elements->empty(); }
-
 bool ParticleContainer::size() const { return _elements->size(); }
-
-iterator ParticleContainer::begin() const {return iterator(this, 0)}
-
-iterator ParticleContainer::end() const {return iterator(this, size())}
-
+iterator ParticleContainer::begin() const { return iterator(this, 0) }
+iterator ParticleContainer::end() const { return iterator(this, size()) }
 void ParticleContainer::add(Particle &&object)
 {
   _elements->push_back(std::forward<T>(object));
