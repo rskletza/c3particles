@@ -12,12 +12,16 @@ int main()
                        // for color, velocity, and mass
         setCircular(p);  // set velocity perpendicular to the location vector
       })
+      ForceMatrix fm_gravity(ParticleSystem particles, std::function<Force(Particle, Particle) ff); //creates a force matrix so that forces between the two same particles do not need to be computed twice (lazy evaluation and Matrix is only half full)
 
       // calculate forces (per frame)
+      //
+      fm_gravity.reset();
+
       std::transform(particles.begin(), particles.end(), particles.begin(),
                      [p, particles] {
 
-    p << accumulate(for_all(particles, gravity)) //gravitational forces between particles
+    p << accumulate(p, fm_gravity) //gravitational forces between particles
 
       << accumulate(for_all(calc_force(particles, [p, other]{ //some other force defined by lamda (in this case, spring force)
       float constant = 1;
