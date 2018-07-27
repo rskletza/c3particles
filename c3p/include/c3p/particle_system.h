@@ -72,6 +72,8 @@ class ParticleSystem
   // Print values of the particles
   void print() const;
 
+  void setGexponent(int exp);
+
   bool empty() const;
 
   size_t size() const;

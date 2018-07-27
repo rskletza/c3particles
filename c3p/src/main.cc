@@ -133,7 +133,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
   glPointSize(5.0f);
   int width, height;
   double xpos, ypos;
-  c3p::ParticleSystem particles(3);
+  c3p::ParticleSystem particles(30);
   particles.setRandom();
   c3p::ParticleRenderer p_renderer(particles);
 
@@ -146,10 +146,9 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
   do
     {
 
-//      std::cout << ctl_p->zoom_scale << std::endl;
       // clear the screen and clear the depth
-      //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glClear(GL_DEPTH_BUFFER_BIT);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      //glClear(GL_DEPTH_BUFFER_BIT);
       // Enable depth test
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
@@ -171,21 +170,35 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       xpos /= 100;
       ypos /= 100;
 
+      View = glm::lookAt(
+          glm::vec3(0, 0, ctl_p->dolly_scale),
+          glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
+          glm::vec3(0, 1, 0)      // Head is up (set to 0,-1,0 to look upside-down)
+          );
+      glm::mat4 mvp = Projection * View * Model;
+
       // physics engine in own thread --> sleep
       // measure time since last swap buffers (std::chrono)
       glm::vec3 random = {rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,
                           rand() / (float)RAND_MAX};
 
+
+
       //            particles.applyForceAll(vec3(0.01,0.0,0.0));
-      if (mousedown) {particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);}
+      //if (mousedown) {particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);}
       //            else
       //                particles.gravitateOrigin(0.7);
       //               particles.applyForceAll(random);
 
       //            particles.addAttractor(glm::vec3{0.0,0,0}, 1.0);
-      particles.addGForce(glm::vec3{0, 0, 0}, 50);
+      if(ctl_p->g_center_checkbtn) { particles.addGForce(glm::vec3{0, 0, 0}, 50); }
       //            particles.addGForce(glm::vec3{-50,0,0}, 50);
-      particles.nbodyGravity();
+      if(ctl_p->g_checkbtn) 
+      {
+        particles.setGexponent(ctl_p->g_scale);
+        particles.nbodyGravity();
+      }
+
       particles.update();
       p_renderer.render(mvp, MatrixID);
 
@@ -211,6 +224,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
 
   ctl_window.join();
   view.join();
+  gtk_window_close(window);
 
   return 0;
 }

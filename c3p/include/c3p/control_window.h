@@ -2,8 +2,9 @@
 
 typedef struct ControlData
 {
-  double zoom_scale;
+  double dolly_scale;
   double pan_scale;
+  double tilt_scale;
 
   int g_checkbtn;  // gravity
   double g_scale;
@@ -14,18 +15,14 @@ typedef struct ControlData
 
 static void initControls(ControlData* ctl)
 {
-  ctl->zoom_scale = -100.0;
-  ctl->pan_scale = 0;
+  ctl->dolly_scale = -100.0;
+  ctl->pan_scale = 0.0;
+  ctl->tilt_scale = 0.0;
   ctl->g_checkbtn = 1;
-  ctl->g_scale = 4;
+  ctl->g_scale = -4;
   ctl->s_checkbtn = 0;
   ctl->s_scale = 4;
   ctl->g_center_checkbtn = 1;
-}
-
-static void print_hello(GtkWidget* widget, gpointer data)
-{
-  g_print("Hello World\n");
 }
 
 static void updateScale(GtkRange* scale, gpointer ctl)
@@ -47,10 +44,11 @@ static void activate(GtkApplication* app, gpointer user_data)
   GtkWidget* boxtl;  // box top left
   GtkWidget* boxtr;  // box top right
 
-  GtkWidget* button;
+  GtkWidget* rev_button;
   GtkWidget* button_box;
-  GtkWidget* zoom_scale;
+  GtkWidget* dolly_scale;
   GtkWidget* pan_scale;
+  GtkWidget* tilt_scale;
 
   GtkWidget* g_checkbtn;  // gravity
   GtkWidget* g_scale;
@@ -77,33 +75,44 @@ static void activate(GtkApplication* app, gpointer user_data)
   gtk_box_set_homogeneous(GTK_BOX(boxtr), TRUE);
   gtk_grid_attach(GTK_GRID(grid), boxtr, 50, 0, 30, 10);
 
-  zoom_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 10, 1);
-  double* zoom_ptr = &(((ControlData*)user_data)->zoom_scale);
-  g_signal_connect(zoom_scale, "value-changed", G_CALLBACK(updateScale),
-                   (gpointer)zoom_ptr);
-  gtk_box_pack_start(GTK_BOX(boxtl), zoom_scale, TRUE, FALSE, 20);
+  dolly_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -100, 0, 10);
+  gtk_range_set_value(GTK_RANGE(dolly_scale), ((ControlData*)user_data)->dolly_scale);
+  double* dolly_ptr = &(((ControlData*)user_data)->dolly_scale);
+  g_signal_connect(dolly_scale, "value-changed", G_CALLBACK(updateScale),
+                   (gpointer)dolly_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), dolly_scale, TRUE, FALSE, 20);
 
-  pan_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 10, 1);
+  pan_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -50, 50, 10);
+  gtk_range_set_value(GTK_RANGE(pan_scale), ((ControlData*)user_data)->pan_scale);
   double* pan_ptr = &(((ControlData*)user_data)->pan_scale);
   g_signal_connect(pan_scale, "value-changed", G_CALLBACK(updateScale),
                    (gpointer)pan_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), pan_scale, TRUE, FALSE, 20);
 
+  tilt_scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, -50, 50, 10);
+  gtk_range_set_value(GTK_RANGE(tilt_scale), ((ControlData*)user_data)->tilt_scale);
+  double* tilt_ptr = &(((ControlData*)user_data)->tilt_scale);
+  g_signal_connect(tilt_scale, "value-changed", G_CALLBACK(updateScale),
+                   (gpointer)tilt_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), tilt_scale, TRUE, FALSE, 20);
+
   //  button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
   //  //gtk_container_add(GTK_CONTAINER(window), button_box);
   //  gtk_box_pack_start(GTK_BOX(boxtl), button_box, TRUE, FALSE, 20);
   //
-  //  button = gtk_button_new_with_label ("Hello World");
+  //  rev_button = gtk_button_new_with_label ("Reverse");
   //  g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
   //  gtk_container_add (GTK_CONTAINER(button_box), button);
 
-  g_checkbtn = gtk_check_button_new_with_label("gravity, G = 1 * 10^(-x)");
+  g_checkbtn = gtk_check_button_new_with_label("gravity, G = 1 * 10^(x)");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_checkbtn), TRUE);
   int* gcheck_ptr = &(((ControlData*)user_data)->g_checkbtn);
   g_signal_connect(g_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
                    (gpointer)gcheck_ptr);
   gtk_box_pack_start(GTK_BOX(boxtr), g_checkbtn, TRUE, FALSE, 20);
 
-  g_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
+  g_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -10, -1, 1);
+  gtk_range_set_value(GTK_RANGE(g_scale), ((ControlData*)user_data)->g_scale);
   double* gscale_ptr = &(((ControlData*)user_data)->g_scale);
   g_signal_connect(g_scale, "value-changed", G_CALLBACK(updateScale),
                    (gpointer)gscale_ptr);
@@ -122,6 +131,7 @@ static void activate(GtkApplication* app, gpointer user_data)
   gtk_box_pack_start(GTK_BOX(boxtr), s_scale, TRUE, FALSE, 20);
 
   g_center_checkbtn = gtk_check_button_new_with_label("set mass in center");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_center_checkbtn), TRUE);
   int* centercheck_ptr = &(((ControlData*)user_data)->g_center_checkbtn);
   g_signal_connect(g_center_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
                    (gpointer)centercheck_ptr);

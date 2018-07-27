@@ -202,6 +202,11 @@ void ParticleSystem::print() const
     }
 }
 
+void ParticleSystem::setGexponent(int exp) 
+{ 
+  _G = 1.0 * std::pow(10, exp);
+}
+
 #if TODO
 std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps)
 {
