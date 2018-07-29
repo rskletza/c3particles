@@ -1,16 +1,20 @@
 #include <c3p/particle_functions.h>
 
-#include <execution>
+//#include <execution> c++17
 #include <algorithm>
+#include <numeric>
+#include <iostream>
 
 namespace c3p
 {
 
   //applies a force to a particle
-  Particle & operator<<(Particle & lhs, Force * force)
+  //TODO perfect forwarding
+  Particle & operator<<(Particle & lhs, Force && force)
   {
     force /= lhs.mass;          // a = f/m (from f = m*a)
     lhs.acceleration += force;  // add the force to the object's acceleration
+    std::cout << lhs.acceleration.x << ", " << lhs.acceleration.y << std::endl;
     return lhs;
   }
   
@@ -23,9 +27,9 @@ namespace c3p
   }
 
   //uses calc_force to calculate gravitational force between two particles
-  Force gravity(const Particle & p1, const Particle & p2, double G)
+  Force gravity(const Particle & p1, const Particle & p2, float G)
   {
-    return (G * calc_force(p1, p2, [p1, p2]()
+    return (G * calc_force(p1, p2, [p1, p2](const Particle &, const Particle &)
     {
       glm::vec3 direction = glm::normalize(p2.location - p1.location);
       float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
@@ -39,8 +43,9 @@ namespace c3p
   Force accumulate(const Particle & p, const ParticleContainer & ps, std::function<Force(const Particle &, const Particle &)> ff)
   {
     Force result = glm::vec3{0.0f, 0.0f, 0.0f};
-    std::for_each(std::execution::par, ps.first(), ps.last(), [p, ff](Particle & n){
-        result += calc_force(p, n, ff);
+    //std::for_each(std::execution::par, ps.begin(), ps.end(), [p, ff](Particle & n){
+    std::for_each(ps.begin(), ps.end(), [p, ff, &result](const Particle & n){
+        result += calc_force(p,n,ff);
         });
   }
 
@@ -53,9 +58,6 @@ namespace c3p
   }
 
   //use a force matrix to avoid calculating each force twice (see ForceMatrix for more info on how this is done)
-  Force accumulate(Particle p, ForceMatrix & fm)
-  {
-
-  }
+//  Force accumulate(Particle p, ForceMatrix & fm)
 
 }

@@ -51,35 +51,41 @@ class ParticleSystem
   void update();
 
   // Apply some force to all the particles
-  void applyForceAll(vec force) const;
+  void applyForceAll(vec force);
 
   // Add an attractor to the system. It attracts all the particles with constant
   // strength
-  void addAttractor(vec point, float strength) const;
+  void addAttractor(vec point, float strength);
 
   // Enable origin force --> particles are attracted to their origin
-  void gravitateOrigin(float strength) const;
+  void gravitateOrigin(float strength);
 
   // Simulate gravitational forces on all the particles
-  void nbodyGravity() const;
+  void nbodyGravity();
 
   // Simulate spring forces between all the particles
-  void nbodySprings(float tension) const;
+  void nbodySprings(float tension);
 
   // Add a gravitational mass to the system
-  void addGForce(vec position, float mass) const;
+  void addGForce(vec position, float mass);
 
   // Print values of the particles
   void print() const;
 
   void setGexponent(int exp);
 
+  const ParticleContainer & container() const;
+
   bool empty() const;
 
   size_t size() const;
 
+  ParticleContainer::iterator begin();
+
+  ParticleContainer::iterator end();
+
  private:
-  ParticleContainer *_particles;
+  ParticleContainer _particles;
   float _G;  // the gravatational constant of the system
 };
 

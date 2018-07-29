@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <algorithm>
 
 #include <gtk/gtk.h>
 
@@ -22,7 +23,10 @@
 #include <c3p/common/shader.h>
 #include <c3p/particle_renderer.h>
 #include <c3p/particle_system.h>
+#include <c3p/particle_functions.h>
 //#include <c3p/particle_container.h>
+
+using namespace c3p;
 
 GLFWwindow* window;
 
@@ -133,7 +137,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
   glPointSize(5.0f);
   int width, height;
   double xpos, ypos;
-  c3p::ParticleSystem particles(30);
+  c3p::ParticleSystem particles(2);
   particles.setRandom();
   c3p::ParticleRenderer p_renderer(particles);
 
@@ -170,6 +174,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       xpos /= 100;
       ypos /= 100;
 
+      //update camera from controls
       View = glm::lookAt(
           glm::vec3(0, 0, ctl_p->dolly_scale),
           glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
@@ -182,23 +187,41 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       glm::vec3 random = {rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,
                           rand() / (float)RAND_MAX};
 
-
-
-      //            particles.applyForceAll(vec3(0.01,0.0,0.0));
       //if (mousedown) {particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);}
       //            else
-      //                particles.gravitateOrigin(0.7);
-      //               particles.applyForceAll(random);
+      //                {particles.gravitateOrigin(0.7);}
 
-      //            particles.addAttractor(glm::vec3{0.0,0,0}, 1.0);
-      if(ctl_p->g_center_checkbtn) { particles.addGForce(glm::vec3{0, 0, 0}, 50); }
-      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
-      if(ctl_p->g_checkbtn) 
-      {
-        particles.setGexponent(ctl_p->g_scale);
-        particles.nbodyGravity();
-      }
+      
+//      if(ctl_p->g_center_checkbtn) { particles.addGForce(glm::vec3{0, 0, 0}, 50); }
+//      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
+//      if(ctl_p->g_checkbtn) 
+//      {
+//        particles.setGexponent(ctl_p->g_scale);
+//        particles.nbodyGravity();
+//      }
 
+//      std::transform(particles.begin(), particles.end(), particles.begin(),
+      std::for_each(particles.begin(), particles.end(),
+                     [&particles](c3p::Particle & p) {
+
+//       p << c3p::accumulate(p, particles.container(), c3p::gravity()); //gravitational forces between particles
+
+          p << c3p::accumulate(p, particles.container(), [&p](const c3p::Particle & p, const c3p::Particle & other){ //some other force defined by lamda (in this case, spring force)
+              float G = 1.0 * std::pow( 10, -6);
+              glm::vec3 direction = glm::normalize(other.location - p.location);
+              float gforce = (p.mass * other.mass) / pow(glm::length(direction), 2);
+
+              return (G * gforce * direction);
+                }) ;
+
+//          p << glm::vec3{1,0,0}; //"external" force e.g. wind
+
+//          << calc_force(p, Object(0,0,0), [p, o]{ //pulls p towards point 0,0,0
+//            return glm::normalize(o.location - p.location) * 0.1f;  //* strength
+//          });
+      });
+
+      particles.print();
       particles.update();
       p_renderer.render(mvp, MatrixID);
 
@@ -207,7 +230,6 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
 //      particles2.nbodyGravity();
 //      particles2.update();
 //      p_renderer2.render(mvp, MatrixID);
-//      particles.print();
 
       // Swap buffers
 
@@ -224,7 +246,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
 
   ctl_window.join();
   view.join();
-  gtk_window_close(window);
+//  gtk_window_close(window);
 
   return 0;
 }
