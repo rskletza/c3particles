@@ -7,14 +7,24 @@
 
 namespace c3p
 {
+  glm::vec3 force(glm::vec3 force)
+  {
+    return force;
+  }
+  
+  std::ostream &operator<<(std::ostream &os, const Force &f)
+  {
+    os << "(" << f.x << ", " << f.y << ", " << f.z << ")\n";
+  }
 
   //applies a force to a particle
   //TODO perfect forwarding
   Particle & operator<<(Particle & lhs, Force && force)
   {
+    std::cout << "force on application: " << force << std::endl;
     force /= lhs.mass;          // a = f/m (from f = m*a)
+    std::cout << "force/mass on application: " << force << std::endl;
     lhs.acceleration += force;  // add the force to the object's acceleration
-    std::cout << lhs.acceleration.x << ", " << lhs.acceleration.y << std::endl;
     return lhs;
   }
   
@@ -22,7 +32,12 @@ namespace c3p
   //when given the same particle twice, it returns the identity 
   Force calc_force(const Particle & p1, const Particle & p2, std::function<Force(const Particle &, const Particle &)> ff)
   {
-    if (&p1 == &p2) { return glm::vec3{0.0f, 0.0f, 0.0f}; }
+    if (&p1 == &p2) 
+    {
+      std::cout << "skipping same particle" << std::endl;
+      return glm::vec3(0,0,0);
+    }
+    std::cout << "calc_force" << std::endl;
     return ff(p1, p2);
   }
 
@@ -46,6 +61,7 @@ namespace c3p
     //std::for_each(std::execution::par, ps.begin(), ps.end(), [p, ff](Particle & n){
     std::for_each(ps.begin(), ps.end(), [p, ff, &result](const Particle & n){
         result += calc_force(p,n,ff);
+        std::cout << "result (accumulate): " << result << std::endl;
         });
   }
 

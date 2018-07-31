@@ -13,6 +13,11 @@ namespace c3p
   using Force = glm::vec3;
   using ParticleContainer = std::vector<Particle>;
 
+  //wrapper for force
+  glm::vec3 force(glm::vec3 force);
+
+  std::ostream & operator<<(std::ostream &os, const Force &f);
+
   //applies a force to a particle
   Particle & operator<<(Particle & lhs, Force && rhs);
   
@@ -25,6 +30,8 @@ namespace c3p
 
   //calc_force for p with each other p in ps and reduce (addition) to one force
   //disadvantage: for each pair of particles, the force is calculated twice
+  //TODO instead of ParticleContainer template with range/sequence of particles
+  //TODO overload with initializer list of constants
   Force accumulate(const Particle & p, const ParticleContainer & ps, std::function<Force(const Particle &, const Particle &)> ff);
 
   Force accumulate(std::initializer_list<Force> forces);

@@ -38,30 +38,35 @@ ParticleSystem::ParticleSystem(size_t size)
          std::pow(
              10,
              -4))  // universal gravitational constant (actually 6.67*10^-11)
+      , _particles(size)
 {
   std::cout << "ParticleSystem constructor called" << std::endl;
   //_particles = new std::vector<Particle>(size, Particle());
-  _particles = new std::vector<Particle>();
-  for (int i = 0; i < size; ++i)
-    {
-      _particles->push_back(Particle());
-    }
+  //_particles = new std::vector<Particle>();
+//  for (int i = 0; i < size; ++i)
+//    {
+//      _particles->push_back(Particle());
+//    }
 }
 
-ParticleSystem::~ParticleSystem() { delete _particles; }
+ParticleSystem::~ParticleSystem() = default;// { delete _particles; }
+
 self_t ParticleSystem::operator=(const self_t &other)
 {
-  if (!empty())
-    {
-      delete _particles;
-    }
-  _particles = new std::vector<Particle>(other.size());
+  //if (!empty())
+  //  {
+  //    delete _particles;
+  //  }
+  //_particles = new std::vector<Particle>(other.size());
+
+      _particles = other._particles;
+      _G = other._G;
 }
 
 self_t ParticleSystem::operator=(self_t &&other)
 {
-  delete _particles;
   _particles = other._particles;
+  _G = other._G;
 }
 
 // give each particle a random color and location. the velocity is set
@@ -69,8 +74,8 @@ self_t ParticleSystem::operator=(self_t &&other)
 // movement around 0,0,0)
 void ParticleSystem::setRandom()
 {
-  std::srand(std::time(nullptr));
-  for (Particle &p : *_particles)
+//  std::srand(std::time(nullptr));
+  for (Particle &p : _particles)
     {
       for (int i = 0; i < 3; ++i)
         {
@@ -79,18 +84,15 @@ void ParticleSystem::setRandom()
           p.color[i] = r;
           p.location[i] = r * 60 - 30;
           p.mass = r * 10 + 200;
-          //      p.mass = 100;
-          //    if(r>0.5) { p.location[1] = 0.0;}
-          //    else {p.location[0] = 0.0;}
         }
+      p.location[2] = 0.0;
       p.origin = p.location;
-      p.velocity = glm::normalize(
-                       glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
-                                  glm::vec3{0.0, 0.0, 1.0})) *
-                   0.5f;
+//      p.velocity = glm::normalize(
+//                       glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
+//                                  glm::vec3{0.0, 0.0, 1.0})) *
+//                   0.5f;
       //          p.velocity = glm::normalize(glm::vec3{p.location[0],
       //          p.location[1], 0.0}) * -1.0f;
-      p.location[2] = 0.0;
     }
 }
 
@@ -99,7 +101,7 @@ void ParticleSystem::update()
   // deltaT will be 1 because calculation is based on frames (and frames are run
   // at 60Hz)
   float deltaT = 1.0;
-  for (Particle &p : *_particles)
+  for (Particle& p : _particles)
     {
       // v(t)= Int(acc) = acc*t + C
       // C is the integration constant, which is the velocity at the previous
@@ -125,9 +127,9 @@ void ParticleSystem::update()
 // TODO pass a view of particles to apply this to
 // TODO perfect forwarding? Or maybe not since I need the force for each vector
 // --> there has to be a better way to do this!
-void ParticleSystem::applyForceAll(glm::vec3 force) const
+void ParticleSystem::applyForceAll(glm::vec3 force)
 {
-  for (Particle &p : *_particles)
+  for (Particle &p : _particles)
     {
       applyForce(force, p);
     }
@@ -135,9 +137,9 @@ void ParticleSystem::applyForceAll(glm::vec3 force) const
 
 // TODO generalize so that gravitate can also implement gravitateOrigin. Maybe
 // with a range?
-void ParticleSystem::addAttractor(glm::vec3 point, float strength) const
+void ParticleSystem::addAttractor(glm::vec3 point, float strength)
 {
-  for (Particle &p : *_particles)
+  for (Particle &p : _particles)
     {
       glm::vec3 force = glm::normalize(point - p.location) * strength;
       applyForce(force, p);
@@ -145,9 +147,9 @@ void ParticleSystem::addAttractor(glm::vec3 point, float strength) const
 }
 
 // enable origin force --> particles are attracted to their origin
-void ParticleSystem::gravitateOrigin(float strength) const
+void ParticleSystem::gravitateOrigin(float strength)
 {
-  for (Particle &p : *_particles)
+  for (Particle &p : _particles)
     {
       glm::vec3 force = glm::normalize(p.origin - p.location) * strength;
       applyForce(force, p);
@@ -155,13 +157,13 @@ void ParticleSystem::gravitateOrigin(float strength) const
 }
 
 // simulate gravitational forces on all the particles
-void ParticleSystem::nbodyGravity() const
+void ParticleSystem::nbodyGravity() 
 {
-  for (Particle &p : *_particles)
+  for (Particle &p : _particles)
     {
       float gforce;
       glm::vec3 direction;
-      for (Particle &other : *_particles)
+      for (Particle &other : _particles)
         {
           if (p.location == other.location) continue;
           direction = glm::normalize(other.location - p.location);
@@ -174,10 +176,10 @@ void ParticleSystem::nbodyGravity() const
 }
 
 // stiff spring has high tension (spring constant)
-void ParticleSystem::nbodySprings(float tension) const {}
-void ParticleSystem::addGForce(glm::vec3 position, float mass) const
+void ParticleSystem::nbodySprings(float tension) {}
+void ParticleSystem::addGForce(glm::vec3 position, float mass) 
 {
-  for (Particle &p : *_particles)
+  for (Particle &p : _particles)
     {
       glm::vec3 direction = glm::normalize(position - p.location);
       float gforce = _G * (p.mass * mass) / pow(glm::length(direction), 2);
@@ -188,16 +190,16 @@ void ParticleSystem::addGForce(glm::vec3 position, float mass) const
 
 void ParticleSystem::print() const
 {
-  for (auto p : *_particles)
+  for (auto p : _particles)
     {
       std::cout << "print" << std::endl;
       for (int i = 0; i < 3; ++i)
         {
-          //            std::cout << "a " << i << " " << p.acceleration[i] <<
-          //            std::endl; std::cout << "v " << i << " " <<
+                      std::cout << "a " << i << " " << p.acceleration[i] << std::endl;
+          //          std::cout << "v " << i << " " <<
           //            p.velocity[i] <<
           //            std::endl;
-          std::cout << "s " << i << " " << p.location[i] << std::endl;
+           //std::cout << "s " << i << " " << p.location[i] << std::endl;
         }
     }
 }
@@ -207,16 +209,39 @@ void ParticleSystem::setGexponent(int exp)
   _G = 1.0 * std::pow(10, exp);
 }
 
-#if TODO
+ParticleContainer::iterator ParticleSystem::begin()
+{
+  return _particles.begin();
+}
+
+ParticleContainer::iterator ParticleSystem::end()
+{
+  return _particles.end();
+}
+
+const ParticleContainer & ParticleSystem::particles() const
+{
+  return _particles;
+}
+
 std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps)
 {
   for (const auto &p : ps.particles())
     {
+      os << "marker\n";
       os << p;
     }
 }
-#endif
 
-size_t ParticleSystem::size() const { return _particles->size(); }
-bool ParticleSystem::empty() const { return _particles->empty(); }
+std::ostream &operator<<(std::ostream &os, const Particle &p)
+{
+  os << "origin: (" << p.origin.x << ", " << p.origin.y << ", " << p.origin.z << ")\n";
+  os << "location: (" << p.location.x << ", " << p.location.y << ", " << p.location.z << ")\n";
+  os << "velocity: (" << p.velocity.x << ", " << p.velocity.y << ", " << p.velocity.z << ")\n";
+  os << "acceleration: (" << p.acceleration.x << ", " << p.acceleration.y << ", " << p.acceleration.z << ")\n";
+  return os;
+}
+
+size_t ParticleSystem::size() const { return _particles.size(); }
+bool ParticleSystem::empty() const { return _particles.empty(); }
 }  // namespace c3p

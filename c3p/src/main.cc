@@ -201,35 +201,43 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
 //      }
 
 //      std::transform(particles.begin(), particles.end(), particles.begin(),
-      std::for_each(particles.begin(), particles.end(),
+       std::for_each(particles.begin(), particles.end(),
                      [&particles](c3p::Particle & p) {
 
-//       p << c3p::accumulate(p, particles.container(), c3p::gravity()); //gravitational forces between particles
+//       p << c3p::accumulate(p, particles.particles(), c3p::gravity()); //gravitational forces between particles
 
-          p << c3p::accumulate(p, particles.container(), [&p](const c3p::Particle & p, const c3p::Particle & other){ //some other force defined by lamda (in this case, spring force)
-              float G = 1.0 * std::pow( 10, -6);
-              glm::vec3 direction = glm::normalize(other.location - p.location);
+          p << c3p::accumulate(p, particles.particles(), [&p](const c3p::Particle & p, const c3p::Particle & other){ 
+              if (&p == &other) { return glm::vec3(0,0,0); }
+              std::cout << "p: " << p << std::endl;
+              std::cout << "other: " << other << std::endl;
+              float G = 1.0 * std::pow( 10, -4);
+              glm::vec3 direction = other.location - p.location;
               float gforce = (p.mass * other.mass) / pow(glm::length(direction), 2);
 
-              return (G * gforce * direction);
+              Force result = (G * gforce * glm::normalize(direction));
+              std::cout << "direction: " << direction << ", length:" << glm::length(direction) << std::endl;
+              std::cout << "gforce : " << gforce << std::endl;
+              std::cout << "result: " << result << std::endl;
+              return result;
+//              return glm::vec3(0,0,0);
                 }) ;
 
-//          p << glm::vec3{1,0,0}; //"external" force e.g. wind
+//          p << glm::vec3{0.1,0,0}; //"external" force e.g. wind
 
-//          << calc_force(p, Object(0,0,0), [p, o]{ //pulls p towards point 0,0,0
-//            return glm::normalize(o.location - p.location) * 0.1f;  //* strength
+//         p << calc_force(p, Particle(), [p](const Particle &, const Particle &){ //pulls p towards point 0,0,0
+//            float G = 1.0 * std::pow( 10, -4);
+//            glm::vec3 direction = glm::normalize(glm::vec3{0,0,0} - p.location);
+//            float gforce = G * (p.mass * 50) / pow(glm::length(direction), 2);
+//
+//            return (gforce * direction);
+            //return glm::normalize(glm::vec3{0,0,0} - p.location) * 1.0f;  //* strength
 //          });
+          std::cout << "end calculation for one particle" << std::endl;
       });
+      std::cout << "particle system" << particles << std::endl;
 
-      particles.print();
       particles.update();
       p_renderer.render(mvp, MatrixID);
-
-//      particles2.addGForce(glm::vec3{0, 0, 0}, 100);
-//      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
-//      particles2.nbodyGravity();
-//      particles2.update();
-//      p_renderer2.render(mvp, MatrixID);
 
       // Swap buffers
 

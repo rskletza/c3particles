@@ -2,6 +2,7 @@
 #define C3P__PARTICLE_SYSTEM__INCLUDED
 
 #include <vector>
+#include <iostream>
 
 #include <c3p/particle_renderer.h>
 //#include <c3p/particle_container.h>
@@ -9,6 +10,7 @@
 namespace c3p
 {
 class ParticleRenderer;
+class ParticleSystem;
 
 // Particle implements a concept of an object that is subject to forces (e.g gravitation)
 struct Particle
@@ -24,6 +26,10 @@ struct Particle
 
 // Apply a force to a particle object
 void applyForce(glm::vec3 force, Particle &p);
+
+std::ostream &operator<<(std::ostream &os, const Particle &p);
+
+std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps);
 
 class ParticleSystem
 {
@@ -74,7 +80,7 @@ class ParticleSystem
 
   void setGexponent(int exp);
 
-  const ParticleContainer & container() const;
+  const ParticleContainer & particles() const;
 
   bool empty() const;
 

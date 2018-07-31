@@ -26,7 +26,7 @@ ParticleRenderer::~ParticleRenderer() = default;
 void ParticleRenderer::render(glm::mat4 &mvp, GLuint MatrixID)
 {
   // for each particle. for now will use
-  for (Particle &p : *_particlecontainer)
+  for (const Particle &p : _particlecontainer)
     {
       GLuint colorbuffer;
       GLuint vertexbuffer;
