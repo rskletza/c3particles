@@ -75,9 +75,6 @@ class ParticleSystem
   // Add a gravitational mass to the system
   void addGForce(vec position, float mass);
 
-  // Print values of the particles
-  void print() const;
-
   void setGexponent(int exp);
 
   const ParticleContainer & particles() const;

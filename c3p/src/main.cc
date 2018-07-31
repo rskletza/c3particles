@@ -137,7 +137,7 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
   glPointSize(5.0f);
   int width, height;
   double xpos, ypos;
-  c3p::ParticleSystem particles(2);
+  c3p::ParticleSystem particles(100);
   particles.setRandom();
   c3p::ParticleRenderer p_renderer(particles);
 
@@ -163,17 +163,6 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       // use own shader
       glUseProgram(shaders);
 
-      // calculate mouse position in world space
-      glfwGetFramebufferSize(window, &width, &height);
-      glfwGetCursorPos(window, &xpos, &ypos);
-      xpos -= width / 2;
-      ypos -= height / 2;
-
-      // dirty hack to scale movement. TODO invert projection matrix or
-      // something
-      xpos /= 100;
-      ypos /= 100;
-
       //update camera from controls
       View = glm::lookAt(
           glm::vec3(0, 0, ctl_p->dolly_scale),
@@ -187,10 +176,6 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       glm::vec3 random = {rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,
                           rand() / (float)RAND_MAX};
 
-      //if (mousedown) {particles.addAttractor(glm::vec3(-xpos, -ypos, 0.0), 1.0);}
-      //            else
-      //                {particles.gravitateOrigin(0.7);}
-
       
 //      if(ctl_p->g_center_checkbtn) { particles.addGForce(glm::vec3{0, 0, 0}, 50); }
 //      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
@@ -200,41 +185,26 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
 //        particles.nbodyGravity();
 //      }
 
+      //update gravitational constant
+      particles.setGexponent(ctl_p->g_scale);
+
 //      std::transform(particles.begin(), particles.end(), particles.begin(),
-       std::for_each(particles.begin(), particles.end(),
-                     [&particles](c3p::Particle & p) {
+      std::for_each(particles.begin(), particles.end(),
+                     [&particles, ctl_p](c3p::Particle & p)
+      {
+        if(ctl_p->g_checkbtn) 
+        {
+          Force f = c3p::accumulate(p, particles.particles(), {1.0f*pow(10,ctl_p->g_scale)}, c3p::gravity); //gravitational forces between particles
+          std::cout << f << std::endl;
+          p << std::move(f);
+        }
 
-//       p << c3p::accumulate(p, particles.particles(), c3p::gravity()); //gravitational forces between particles
-
-          p << c3p::accumulate(p, particles.particles(), [&p](const c3p::Particle & p, const c3p::Particle & other){ 
-              if (&p == &other) { return glm::vec3(0,0,0); }
-              std::cout << "p: " << p << std::endl;
-              std::cout << "other: " << other << std::endl;
-              float G = 1.0 * std::pow( 10, -4);
-              glm::vec3 direction = other.location - p.location;
-              float gforce = (p.mass * other.mass) / pow(glm::length(direction), 2);
-
-              Force result = (G * gforce * glm::normalize(direction));
-              std::cout << "direction: " << direction << ", length:" << glm::length(direction) << std::endl;
-              std::cout << "gforce : " << gforce << std::endl;
-              std::cout << "result: " << result << std::endl;
-              return result;
-//              return glm::vec3(0,0,0);
-                }) ;
-
-//          p << glm::vec3{0.1,0,0}; //"external" force e.g. wind
-
-//         p << calc_force(p, Particle(), [p](const Particle &, const Particle &){ //pulls p towards point 0,0,0
-//            float G = 1.0 * std::pow( 10, -4);
-//            glm::vec3 direction = glm::normalize(glm::vec3{0,0,0} - p.location);
-//            float gforce = G * (p.mass * 50) / pow(glm::length(direction), 2);
-//
-//            return (gforce * direction);
-            //return glm::normalize(glm::vec3{0,0,0} - p.location) * 1.0f;  //* strength
-//          });
-          std::cout << "end calculation for one particle" << std::endl;
+        if(ctl_p->g_center_checkbtn)
+        {
+          //attract to center
+          p << gravity(p, particle(100.0f), {1.0f*pow(10,ctl_p->g_scale)});
+        }
       });
-      std::cout << "particle system" << particles << std::endl;
 
       particles.update();
       p_renderer.render(mvp, MatrixID);

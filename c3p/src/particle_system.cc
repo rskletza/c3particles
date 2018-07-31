@@ -39,26 +39,12 @@ ParticleSystem::ParticleSystem(size_t size)
              10,
              -4))  // universal gravitational constant (actually 6.67*10^-11)
       , _particles(size)
-{
-  std::cout << "ParticleSystem constructor called" << std::endl;
-  //_particles = new std::vector<Particle>(size, Particle());
-  //_particles = new std::vector<Particle>();
-//  for (int i = 0; i < size; ++i)
-//    {
-//      _particles->push_back(Particle());
-//    }
-}
+{ }
 
 ParticleSystem::~ParticleSystem() = default;// { delete _particles; }
 
 self_t ParticleSystem::operator=(const self_t &other)
 {
-  //if (!empty())
-  //  {
-  //    delete _particles;
-  //  }
-  //_particles = new std::vector<Particle>(other.size());
-
       _particles = other._particles;
       _G = other._G;
 }
@@ -83,14 +69,15 @@ void ParticleSystem::setRandom()
           r = r / (float)RAND_MAX;
           p.color[i] = r;
           p.location[i] = r * 60 - 30;
-          p.mass = r * 10 + 200;
+          p.mass = r * 10;
         }
+//      p.mass = 10;
       p.location[2] = 0.0;
       p.origin = p.location;
-//      p.velocity = glm::normalize(
-//                       glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
-//                                  glm::vec3{0.0, 0.0, 1.0})) *
-//                   0.5f;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.5f;
       //          p.velocity = glm::normalize(glm::vec3{p.location[0],
       //          p.location[1], 0.0}) * -1.0f;
     }
@@ -188,22 +175,6 @@ void ParticleSystem::addGForce(glm::vec3 position, float mass)
     }
 }
 
-void ParticleSystem::print() const
-{
-  for (auto p : _particles)
-    {
-      std::cout << "print" << std::endl;
-      for (int i = 0; i < 3; ++i)
-        {
-                      std::cout << "a " << i << " " << p.acceleration[i] << std::endl;
-          //          std::cout << "v " << i << " " <<
-          //            p.velocity[i] <<
-          //            std::endl;
-           //std::cout << "s " << i << " " << p.location[i] << std::endl;
-        }
-    }
-}
-
 void ParticleSystem::setGexponent(int exp) 
 { 
   _G = 1.0 * std::pow(10, exp);
@@ -239,6 +210,7 @@ std::ostream &operator<<(std::ostream &os, const Particle &p)
   os << "location: (" << p.location.x << ", " << p.location.y << ", " << p.location.z << ")\n";
   os << "velocity: (" << p.velocity.x << ", " << p.velocity.y << ", " << p.velocity.z << ")\n";
   os << "acceleration: (" << p.acceleration.x << ", " << p.acceleration.y << ", " << p.acceleration.z << ")\n";
+  os << "mass: " << p.mass << "\n";
   return os;
 }
 
