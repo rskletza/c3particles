@@ -4,6 +4,11 @@
 *.bin
 *.swp
 
+#ignore Latex aux files
+*.log
+*.aux
+*synctex.gz
+
 #ignore tags files
 .tags
 tags

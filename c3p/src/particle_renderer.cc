@@ -19,8 +19,7 @@ ParticleRenderer::ParticleRenderer(const ParticleSystem &ps)
 ParticleRenderer::~ParticleRenderer() = default;
 
 // assignment and comparison should not be needed since there should always only
-// be one renderer per particle system  should the renderer then be a member of
-// the particle system?
+// be one renderer per particle system
 
 // calculate color and vertex buffers for each particle and pass them to OpenGL
 void ParticleRenderer::render(glm::mat4 &mvp, GLuint MatrixID)

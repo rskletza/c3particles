@@ -24,6 +24,7 @@
 #include <c3p/particle_renderer.h>
 #include <c3p/particle_system.h>
 #include <c3p/particle_functions.h>
+#include <c3p/newtonian_objects.h>
 //#include <c3p/particle_container.h>
 
 using namespace c3p;
@@ -135,24 +136,17 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
       Model;  // Remember, matrix multiplication is the other way around
 
   glPointSize(5.0f);
-  int width, height;
-  double xpos, ypos;
-  c3p::ParticleSystem particles(100);
-  particles.setRandom();
-  c3p::ParticleRenderer p_renderer(particles);
-
-//  c3p::ParticleSystem particles2(100);
-//  particles2.setRandom();
-//  c3p::ParticleRenderer p_renderer2(particles2);
-
-//  auto pc = c3p::ParticleContainer();
+  c3p::ParticleSystem ps(50);
+  ps.setRandom();
+  c3p::ParticleRenderer p_renderer(ps);
 
   do
     {
 
       // clear the screen and clear the depth
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      //glClear(GL_DEPTH_BUFFER_BIT);
+      if(ctl_p->trail_checkbtn) { glClear(GL_DEPTH_BUFFER_BIT); }
+      else { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+
       // Enable depth test
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
@@ -171,42 +165,50 @@ glewExperimental = true;  // Needed for core profile Initialize GLEW
           );
       glm::mat4 mvp = Projection * View * Model;
 
-      // physics engine in own thread --> sleep
-      // measure time since last swap buffers (std::chrono)
-      glm::vec3 random = {rand() / (float)RAND_MAX, rand() / (float)RAND_MAX,
-                          rand() / (float)RAND_MAX};
-
+      // TODO physics engine in own thread --> sleep
+      // TODO measure time since last swap buffers (std::chrono)
       
-//      if(ctl_p->g_center_checkbtn) { particles.addGForce(glm::vec3{0, 0, 0}, 50); }
-//      //            particles.addGForce(glm::vec3{-50,0,0}, 50);
+//      if(ctl_p->g_center_checkbtn) { ps.addGForce(glm::vec3{0, 0, 0}, 50); }
+//      //            ps.addGForce(glm::vec3{-50,0,0}, 50);
 //      if(ctl_p->g_checkbtn) 
 //      {
-//        particles.setGexponent(ctl_p->g_scale);
-//        particles.nbodyGravity();
+//        ps.setGexponent(ctl_p->g_scale);
+//        ps.nbodyGravity();
 //      }
 
+      if(ctl_p->restart_btn)
+      {
+        ps.reset();
+        ctl_p->restart_btn = 0; //critical! TODO
+      }
       //update gravitational constant
-      particles.setGexponent(ctl_p->g_scale);
+      ps.setGexponent(ctl_p->g_scale);
 
-//      std::transform(particles.begin(), particles.end(), particles.begin(),
-      std::for_each(particles.begin(), particles.end(),
-                     [&particles, ctl_p](c3p::Particle & p)
+//      std::transform(ps.begin(), ps.end(), ps.begin(),
+      std::for_each(ps.begin(), ps.end(),
+                     [&ps, ctl_p](c3p::Particle & p)
       {
         if(ctl_p->g_checkbtn) 
         {
-          Force f = c3p::accumulate(p, particles.particles(), {1.0f*pow(10,ctl_p->g_scale)}, c3p::gravity); //gravitational forces between particles
-          std::cout << f << std::endl;
-          p << std::move(f);
+          p << c3p::accumulate(p, ps.particles(), {ps.g_constant()}, c3p::gravity); //gravitational forces between particles
         }
 
         if(ctl_p->g_center_checkbtn)
         {
           //attract to center
-          p << gravity(p, particle(100.0f), {1.0f*pow(10,ctl_p->g_scale)});
+          p << gravity(p, Particle(50.0f), {ps.g_constant()});
+        }
+
+        if(ctl_p->s_checkbtn)
+        {
+          p << c3p::accumulate(p, ps.particles(), {10,1}, c3p::spring);
+          Force s = spring(p, Particle(), {5,0.001});
+          std::cout << s << std::endl;
+          p << std::move(s);
         }
       });
 
-      particles.update();
+      ps.update();
       p_renderer.render(mvp, MatrixID);
 
       // Swap buffers

@@ -7,25 +7,17 @@
 
 namespace c3p
 {
-  glm::vec3 force(glm::vec3 force)
-  {
-    return force;
-  }
-  
-  std::ostream &operator<<(std::ostream &os, const Force &f)
-  {
-    os << "(" << f.x << ", " << f.y << ", " << f.z << ")\n";
-  }
+// Some sites I used to brush up on my physics:
+// - http://www.pas.rochester.edu/~blackman/ast104/newton3laws16.html
+// -
+// https://www.johannes-strommer.com/rechner/basics-mathe-mechanik/ruck-beschleunigung-geschwindigkeit-weg
+// -
+// http://zonalandeducation.com/mstm/physics/mechanics/forces/newton/mightyFEqMA/mightyFEqMA.html
+// -
+// http://physics.weber.edu/amiri/physics1010online/WSUonline12w/OnLineCourseMovies/CircularMotion&Gravity/reviewofgravity/ReviewofGravity.html
+// -
+// http://www.physicsclassroom.com/class/waves/Lesson-0/Motion-of-a-Mass-on-a-Spring
 
-  Particle particle(float ms)
-  {
-    auto p = Particle();
-    p.mass = ms;
-    return p; 
-  }
-//
-//  inline float Mass(float mass) {return mass};
-//  inline glm::vec3 Location(glm::vec3 loc) {return loc};
 
   //applies a force to a particle
   //TODO perfect forwarding
@@ -49,20 +41,8 @@ namespace c3p
     return ff(p1,p2);
   }
 
-  //same as calc_force but uses an intitializer list to pass additional parameters
-  Force calc_force(const Particle & p1, const Particle & p2, std::initializer_list<float> params, std::function<Force(const Particle & p1, const Particle & p2, std::initializer_list<float>)> ff)
-  {
-    //if (&p1 == &p2) //doesn't work for some reason
-    if (p1.location == p2.location) 
-    {
-      std::cout << "skipping same particle" << std::endl;
-      return glm::vec3(0,0,0);
-    }
-    return ff(p1,p2,params);
-  }
-
   //uses calc_force to calculate gravitational force between two particles
-  Force gravity(const Particle & p1, const Particle & p2, std::initializer_list<float> G)
+  Force gravity(const Particle & p1, const Particle & p2, std::initializer_list<float> params)
   {
     Force result = (calc_force(p1, p2, [p1, p2](const Particle &, const Particle &)
     {
@@ -71,23 +51,32 @@ namespace c3p
 
       return (gforce * direction);
     }));
-    for (auto c : G)
+    //for gravity, only gravity constant
+    for (auto c : params)
     {
       result *= c;
     }
     return result;
   }
 
-//  Force gravity(const Particle & p1, const Particle & p2)
-//  {
-//    return (calc_force(p1, p2, [p1, p2](const Particle &, const Particle &)
-//    {
-//      glm::vec3 direction = glm::normalize(p2.location - p1.location);
-//      float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
-//
-//      return (gforce * direction);
-//    }));
-//  }
+  Force spring(const Particle & p1, const Particle & p2, std::initializer_list<float> params)
+  {
+    Force result = calc_force(p1,p2, [p1,p2,params](const Particle &, const Particle &)
+      {
+        //f = k*x (k is constant and x
+        Spring s(params); //use params to create spring
+        std::cout << s.length << "<- length , const ->" << s.constant << std::endl;
+        std::cout << "p2: " << p2 << "p1: " << p1 << std::endl;
+        glm::vec3 direction = p2.location - p1.location;
+        std::cout << "displacement: " << (s.length - glm::length(direction));
+        float magnitude = -1 * s.constant * (s.length - glm::length(direction));
+        glm::normalize(direction);
+        std::cout << "direction: " << direction << ", magnitude: " << magnitude << std::endl;
+
+        return direction * magnitude;
+      });
+  }
+
 
   //calc_force for p with each other p in ps and reduce (addition) to one force
   //disadvantage: for each pair of particles, the force is calculated twice

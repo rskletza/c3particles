@@ -11,6 +11,9 @@ typedef struct ControlData
   int s_checkbtn;  // spring
   double s_scale;
   int g_center_checkbtn;
+
+  int trail_checkbtn;
+  int restart_btn;
 } ControlData;
 
 static void initControls(ControlData* ctl)
@@ -23,6 +26,13 @@ static void initControls(ControlData* ctl)
   ctl->s_checkbtn = 0;
   ctl->s_scale = 4;
   ctl->g_center_checkbtn = 1;
+  ctl->trail_checkbtn = 0;
+  ctl->restart_btn = 0;
+}
+
+static void updateBtn(GtkButton* btn, gpointer ctl)
+{
+  *(int*)ctl = 1;
 }
 
 static void updateScale(GtkRange* scale, gpointer ctl)
@@ -55,6 +65,9 @@ static void activate(GtkApplication* app, gpointer user_data)
   GtkWidget* s_checkbtn;  // spring
   GtkWidget* s_scale;
   GtkWidget* g_center_checkbtn;
+
+  GtkWidget* trail_checkbtn;  // trail behind particles
+  GtkWidget* restart_btn;
 
   // create new window
   window = gtk_application_window_new(app);
@@ -96,13 +109,21 @@ static void activate(GtkApplication* app, gpointer user_data)
                    (gpointer)tilt_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), tilt_scale, TRUE, FALSE, 20);
 
+  trail_checkbtn = gtk_check_button_new_with_label("trails");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(trail_checkbtn), FALSE);
+  int* trailcheck_ptr = &(((ControlData*)user_data)->trail_checkbtn);
+  g_signal_connect(trail_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
+                   (gpointer)trailcheck_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), trail_checkbtn, TRUE, FALSE, 20);
+
   //  button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
   //  //gtk_container_add(GTK_CONTAINER(window), button_box);
   //  gtk_box_pack_start(GTK_BOX(boxtl), button_box, TRUE, FALSE, 20);
   //
-  //  rev_button = gtk_button_new_with_label ("Reverse");
-  //  g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-  //  gtk_container_add (GTK_CONTAINER(button_box), button);
+  restart_btn = gtk_button_new_with_label ("Restart");
+  int* restart_ptr = &(((ControlData*)user_data)->restart_btn);
+  g_signal_connect (restart_btn, "clicked", G_CALLBACK (updateBtn), (gpointer)restart_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), restart_btn, TRUE, FALSE, 20);
 
   g_checkbtn = gtk_check_button_new_with_label("gravity, G = 1 * 10^(x)");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_checkbtn), TRUE);

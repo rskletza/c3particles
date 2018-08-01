@@ -1,5 +1,10 @@
 # c3particles
+
 A C++ interface for rendering particle systems.
+
+## Abstract
+
+Particle systems are used in many different areas, ..animation, simulation, research, ... . No matter the area of application, the basic rules governing these systems are the same: the laws of physics. C3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
 
 <!-- [![NPM Version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
@@ -7,6 +12,8 @@ A C++ interface for rendering particle systems.
     One to two paragraph statement about your product and what it does. Motivation
 
 ![](header.png) -->
+
+## System diagram
 
 ## Installation
 

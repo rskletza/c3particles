@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 
+#include <c3p/newtonian_objects.h>
 #include <c3p/particle_renderer.h>
 //#include <c3p/particle_container.h>
 
@@ -12,22 +13,8 @@ namespace c3p
 class ParticleRenderer;
 class ParticleSystem;
 
-// Particle implements a concept of an object that is subject to forces (e.g gravitation)
-struct Particle
-{
-  glm::vec3 color;  // TODO: does this belong here?
-  glm::vec3 origin;
-  glm::vec3 location;
-  glm::vec3 velocity;
-  glm::vec3 acceleration;
-  float mass;
-  float ttl;
-};
-
 // Apply a force to a particle object
-void applyForce(glm::vec3 force, Particle &p);
-
-std::ostream &operator<<(std::ostream &os, const Particle &p);
+//void applyForce(glm::vec3 force, Particle &p);
 
 std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps);
 
@@ -53,29 +40,31 @@ class ParticleSystem
   // movement around 0,0,0)
   void setRandom();
 
+  void reset();
+
   // Update the values (location, velocity, etc) of all the particles)
   void update();
 
   // Apply some force to all the particles
-  void applyForceAll(vec force);
+//  void applyForceAll(vec force);
 
   // Add an attractor to the system. It attracts all the particles with constant
   // strength
-  void addAttractor(vec point, float strength);
+//  void addAttractor(vec point, float strength);
 
   // Enable origin force --> particles are attracted to their origin
-  void gravitateOrigin(float strength);
+//  void gravitateOrigin(float strength);
 
   // Simulate gravitational forces on all the particles
-  void nbodyGravity();
+//  void nbodyGravity();
 
-  // Simulate spring forces between all the particles
-  void nbodySprings(float tension);
 
   // Add a gravitational mass to the system
-  void addGForce(vec position, float mass);
+//  void addGForce(vec position, float mass);
 
   void setGexponent(int exp);
+
+  float g_constant() const;
 
   const ParticleContainer & particles() const;
 
