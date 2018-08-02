@@ -31,7 +31,8 @@ void ParticleRenderer::render(glm::mat4 &mvp, GLuint MatrixID)
       GLuint vertexbuffer;
 
       // void fillVertexBuffer()
-      GLfloat vertex_buffer_data[3] = {p.location[0], p.location[1], p.location[2]};
+      GLfloat vertex_buffer_data[3] = {p.location[0], p.location[1],
+                                       p.location[2]};
       glGenBuffers(1, &vertexbuffer);
       glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_data),
@@ -39,7 +40,8 @@ void ParticleRenderer::render(glm::mat4 &mvp, GLuint MatrixID)
 
       // void fillColorBuffer()
       GLfloat color_buffer_data[3] = {p.color[0], p.color[1], p.color[2]};
-      //GLfloat color_buffer_data[3] = {(p.location[0]+30)/60, (p.location[1]+30)/60,
+      // GLfloat color_buffer_data[3] = {(p.location[0]+30)/60,
+      // (p.location[1]+30)/60,
       //  (p.location[2]+30)/60};
       glGenBuffers(1, &colorbuffer);
       glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);

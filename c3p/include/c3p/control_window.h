@@ -30,11 +30,7 @@ static void initControls(ControlData* ctl)
   ctl->restart_btn = 0;
 }
 
-static void updateBtn(GtkButton* btn, gpointer ctl)
-{
-  *(int*)ctl = 1;
-}
-
+static void updateBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl = 1; }
 static void updateScale(GtkRange* scale, gpointer ctl)
 {
   *(double*)ctl = gtk_range_get_value(scale);
@@ -88,22 +84,26 @@ static void activate(GtkApplication* app, gpointer user_data)
   gtk_box_set_homogeneous(GTK_BOX(boxtr), TRUE);
   gtk_grid_attach(GTK_GRID(grid), boxtr, 50, 0, 30, 10);
 
-  dolly_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -100, 0, 10);
-  gtk_range_set_value(GTK_RANGE(dolly_scale), ((ControlData*)user_data)->dolly_scale);
+  dolly_scale =
+      gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -100, 0, 10);
+  gtk_range_set_value(GTK_RANGE(dolly_scale),
+                      ((ControlData*)user_data)->dolly_scale);
   double* dolly_ptr = &(((ControlData*)user_data)->dolly_scale);
   g_signal_connect(dolly_scale, "value-changed", G_CALLBACK(updateScale),
                    (gpointer)dolly_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), dolly_scale, TRUE, FALSE, 20);
 
   pan_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, -50, 50, 10);
-  gtk_range_set_value(GTK_RANGE(pan_scale), ((ControlData*)user_data)->pan_scale);
+  gtk_range_set_value(GTK_RANGE(pan_scale),
+                      ((ControlData*)user_data)->pan_scale);
   double* pan_ptr = &(((ControlData*)user_data)->pan_scale);
   g_signal_connect(pan_scale, "value-changed", G_CALLBACK(updateScale),
                    (gpointer)pan_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), pan_scale, TRUE, FALSE, 20);
 
   tilt_scale = gtk_scale_new_with_range(GTK_ORIENTATION_VERTICAL, -50, 50, 10);
-  gtk_range_set_value(GTK_RANGE(tilt_scale), ((ControlData*)user_data)->tilt_scale);
+  gtk_range_set_value(GTK_RANGE(tilt_scale),
+                      ((ControlData*)user_data)->tilt_scale);
   double* tilt_ptr = &(((ControlData*)user_data)->tilt_scale);
   g_signal_connect(tilt_scale, "value-changed", G_CALLBACK(updateScale),
                    (gpointer)tilt_ptr);
@@ -120,9 +120,10 @@ static void activate(GtkApplication* app, gpointer user_data)
   //  //gtk_container_add(GTK_CONTAINER(window), button_box);
   //  gtk_box_pack_start(GTK_BOX(boxtl), button_box, TRUE, FALSE, 20);
   //
-  restart_btn = gtk_button_new_with_label ("Restart");
+  restart_btn = gtk_button_new_with_label("Restart");
   int* restart_ptr = &(((ControlData*)user_data)->restart_btn);
-  g_signal_connect (restart_btn, "clicked", G_CALLBACK (updateBtn), (gpointer)restart_ptr);
+  g_signal_connect(restart_btn, "clicked", G_CALLBACK(updateBtn),
+                   (gpointer)restart_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), restart_btn, TRUE, FALSE, 20);
 
   g_checkbtn = gtk_check_button_new_with_label("gravity, G = 1 * 10^(x)");

@@ -16,7 +16,7 @@
 \mainmatter  % start of an individual contribution
 
 % first the title is needed
-\title{c3particles: \\ Modeling Particle Systems in C++}
+\title{c3particles: \\ Modeling a Particle System in C++}
 
 % a short form should be given in case it is too long for the running head
 \titlerunning{c3particles}
@@ -41,8 +41,50 @@ Particle systems are used in many different areas, ..animation, simulation, rese
 %keywords{network operating systems, programmable networks, Software-Defined Networking, SDN-controllers}
 \end{abstract}
 
-
 \section{Introduction}
+
+\section{Short Recap of Physics}
+
+In order to be able to model the physics of a particle system, it is necessary to first understand the basic rules of motion.
+
+Newton's First Law of Motion states that \begin{quotation}
+Every object in a state of uniform motion tends to remain in that state of motion unless an external force is applied to it. \end{quotation}
+
+This means that an object will not move unless it is accelerated by a force, which brings us to Newton's Second Law of Motion: \begin{quotation}
+The relationship between an object's mass \emph{m}, its acceleration \emph{a}, and the applied force \emph{F} is $ F = m*a $.
+\end{quotation}
+
+With this information it is possible to calculate the acceleration of an object by dividing the applied force by the object's mass. The next step is deriving the velocity and location of the object per time step by integration.
+
+The velocity of an object can be calculated by integrating the acceleration over time t. 
+
+\[\overrightarrow{v}(t) = \int \mathrm{(\overrightarrow{a})} \mathrm{d}t = \overrightarrow{a}*t + C_v\]
+
+C is the integration constant, in this case it is equal to the velocity of t-1 for discrete time steps. Integrating the velocity over t yields the location.
+
+\[\overrightarrow{s}(t) = \int \mathrm{(\overrightarrow{v})} \mathrm{d}t = \int (\overrightarrow{a}*t + C_v) \mathrm{d}t = \frac{\overrightarrow{a}*t^2}{2} + C_s\]
+
+Analogous to $C_v$, $C_s$ is equal to the location at t-1.
+
+These formulas serve as the foundations of the physical model of the particle system. 
+
+\section{Modeling the Particle System}
+\begin{itemize}
+\item elements of the system: particle (newtonian object)
+\item force
+
+\item $\rightarrow$ concepts
+
+\item particle is passive, it doesn't "care" where the force is coming from $\rightarrow$ need some way to apply a force to a particle
+\end{itemize}
+
+\section{Implementation}
+
+\begin{itemize}
+\item system diagram
+\item particle system would be boring without visualization, however, this is not part of the formal model and so it is also a separate module in the code
+\item OpenGL is used, however any graphics library could be utilized with an appropriate interface (Particle Renderer)
+\end{itemize}
 
 %
 %\textbf{

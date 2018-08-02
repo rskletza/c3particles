@@ -37,7 +37,7 @@ class ParticleRenderer
   void render(glm::mat4 &mvp, GLuint MatrixID);
 
  private:
-  const ParticleContainerFk & _particlecontainer;
+  const ParticleContainerFk &_particlecontainer;
 };
 
 }  // namespace c3p

@@ -1,8 +1,8 @@
 #ifndef C3P__PARTICLE_SYSTEM__INCLUDED
 #define C3P__PARTICLE_SYSTEM__INCLUDED
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include <c3p/newtonian_objects.h>
 #include <c3p/particle_renderer.h>
@@ -14,7 +14,7 @@ class ParticleRenderer;
 class ParticleSystem;
 
 // Apply a force to a particle object
-//void applyForce(glm::vec3 force, Particle &p);
+// void applyForce(glm::vec3 force, Particle &p);
 
 std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps);
 
@@ -46,27 +46,26 @@ class ParticleSystem
   void update();
 
   // Apply some force to all the particles
-//  void applyForceAll(vec force);
+  //  void applyForceAll(vec force);
 
   // Add an attractor to the system. It attracts all the particles with constant
   // strength
-//  void addAttractor(vec point, float strength);
+  //  void addAttractor(vec point, float strength);
 
   // Enable origin force --> particles are attracted to their origin
-//  void gravitateOrigin(float strength);
+  //  void gravitateOrigin(float strength);
 
   // Simulate gravitational forces on all the particles
-//  void nbodyGravity();
-
+  //  void nbodyGravity();
 
   // Add a gravitational mass to the system
-//  void addGForce(vec position, float mass);
+  //  void addGForce(vec position, float mass);
 
   void setGexponent(int exp);
 
   float g_constant() const;
 
-  const ParticleContainer & particles() const;
+  const ParticleContainer &particles() const;
 
   bool empty() const;
 
