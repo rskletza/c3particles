@@ -105,6 +105,9 @@ int main(void)
     // black background
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClearAccum(0.0f, 0.0f, 0.0f, 0.0f);
+
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
@@ -151,10 +154,15 @@ int main(void)
           }
         else
           {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
           }
+        //copy current accumulation buffer to color buffer multiplied by factor
+        glClear(GL_ACCUM_BUFFER_BIT);
+        glAccum(GL_RETURN, 0.95f);
+        glAccum(GL_MULT, 0.5f);
 
-        // Enable depth test
+
+//        // Enable depth test
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
@@ -191,6 +199,12 @@ int main(void)
             ctl_p->restart_btn = 0;  // critical! TODO
           }
 
+        if (ctl_p->reverse_btn)
+        {
+          ps.reverse();
+          ctl_p->reverse_btn = 0;  // critical! TODO
+        }
+
         // update gravitational constant
         ps.setGexponent(ctl_p->g_scale);
 
@@ -206,7 +220,7 @@ int main(void)
           if (ctl_p->g_center_checkbtn)
             {
               // attract to center
-              p << gravity(p, Particle(50.0f), {ps.g_constant()});
+              p << gravity(p, Particle(100.0f), {ps.g_constant()});
             }
 
           if (ctl_p->s_checkbtn)
@@ -219,11 +233,15 @@ int main(void)
         });
 
         ps.update();
-        p_renderer.render(mvp, MatrixID);
+        p_renderer.renderPoints(mvp, MatrixID);
+        //p_renderer.renderCubes(mvp, MatrixID);
 
         // Swap buffers
 
+        //glReadBuffer(GL_FRONT);
+        //glAccum(GL_ACCUM, 0.9f);
         glfwSwapBuffers(window);
+        glAccum(GL_LOAD, 0.9f);
         glfwPollEvents();
 
       }  // Check if the ESC key was pressed or the window was closed

@@ -5,6 +5,7 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 namespace c3p
 {
@@ -56,15 +57,17 @@ void ParticleSystem::setRandom()
           p.color[i] = r;
           p.location[i] = r * 60 - 30;
           p.mass = r * 10 + 100;
+          p.size = r;
         }
       //      p.mass = 10;
       p.location[2] = 0.0;
+      std::cout << p.size << std::endl;
       p.origin = p.location;
-      //      p.velocity = glm::normalize(
-      //                       glm::cross(glm::vec3{p.location[0],
-      //                       p.location[1], 0.0},
-      //                                  glm::vec3{0.0, 0.0, 1.0})) *
-      //                   0.2f;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0],
+                       p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.2f;
       //          p.velocity = glm::normalize(glm::vec3{p.location[0],
       //          p.location[1], 0.0}) * -1.0f;
     }
@@ -75,48 +78,49 @@ void ParticleSystem::reset()
   for (Particle &p : _particles)
     {
       p.location = p.origin;
-      p.location[2] = 0.0;
+//      p.location[2] = 0.0;
       p.velocity *= 0;
-      //      p.velocity = glm::normalize(
-      //                       glm::cross(glm::vec3{p.location[0],
-      //                       p.location[1], 0.0},
-      //                                  glm::vec3{0.0, 0.0, 1.0})) *
-      //                   0.2f;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0],
+                       p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.2f;
+    }
+}
+
+void ParticleSystem::reverse()
+{
+  for (Particle &p : _particles)
+    {
+      p.velocity *= -1.0f;
     }
 }
 
 void ParticleSystem::update()
 {
-  // deltaT will be 1 because calculation is based on frames (and frames are run
-  // at 60Hz)
-  float deltaT = 1.0;
+  // deltaT will be 1 because calculation is based on frames 
   for (Particle &p : _particles)
+//  std::transform(_particles.begin(), _particles.end(), _particles.begin(), [](Particle & p)
     {
       // v(t)= Int(acc) = acc*t + C
       // C is the integration constant, which is the velocity at the previous
       // point in time
       //--> v(t) = a*t + v(t-1)
-      // t in this case is equal to 1, as I am using frames to measure time
-      // (TODO
-      // frames are not always constant, use actual time eg seconds with delta
-      // glfwGetTime  as a result, the velocity v(t) = acc*1 + v(t-1)
-      p.velocity += p.acceleration * deltaT;
+      // t in this case is equal to 1
+      // as a result, the velocity v(t) = acc*1 + v(t-1)
+      p.velocity += p.acceleration * 1.0f; //deltaT = 1.0
 
       // s(t) = Int(velocity) = Int(acc*t + C) = (a*t^2)/2 + C*t + C1
       // C1 is the location at the previous point in time
       //--> s(t) = (a*t^2)/2 + v(t) + s(t-1)
-      // again, t is equal to
-      p.location += (p.acceleration * deltaT) / 2.0f + p.velocity;
+      // again, t is equal to 1
+      p.location += (p.acceleration * 1.0f) / 2.0f + p.velocity; //deltaT^2 = 1.0
 
-      p.acceleration = {0.0, 0.0,
-                        0.0};  // acceleration is recalculated every time
+      p.acceleration = {0, 0, 0};  // acceleration is recalculated every time
     }
+//    );
 }
 
-//// TODO pass a view of particles to apply this to
-//// TODO perfect forwarding? Or maybe not since I need the force for each
-///vector
-//// --> there has to be a better way to do this!
 // void ParticleSystem::applyForceAll(glm::vec3 force)
 //{
 //  for (Particle &p : _particles)
@@ -125,8 +129,6 @@ void ParticleSystem::update()
 //    }
 //}
 //
-//// TODO generalize so that gravitate can also implement gravitateOrigin. Maybe
-//// with a range?
 // void ParticleSystem::addAttractor(glm::vec3 point, float strength)
 //{
 //  for (Particle &p : _particles)
@@ -161,8 +163,6 @@ void ParticleSystem::update()
 //          2);
 //        }
 //      applyForce(gforce * direction, p);
-//
-//      // TODO use addGForce here
 //    }
 //}
 //

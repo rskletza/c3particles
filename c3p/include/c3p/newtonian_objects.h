@@ -16,6 +16,7 @@ struct Particle
   glm::vec3 location;
   glm::vec3 velocity;
   glm::vec3 acceleration;
+  float size;
   float mass;
   float ttl;
   Particle() = default;

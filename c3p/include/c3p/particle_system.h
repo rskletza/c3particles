@@ -42,6 +42,8 @@ class ParticleSystem
 
   void reset();
 
+  void reverse();
+
   // Update the values (location, velocity, etc) of all the particles)
   void update();
 

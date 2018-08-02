@@ -14,6 +14,7 @@ typedef struct ControlData
 
   int trail_checkbtn;
   int restart_btn;
+  int reverse_btn;
 } ControlData;
 
 static void initControls(ControlData* ctl)
@@ -28,6 +29,7 @@ static void initControls(ControlData* ctl)
   ctl->g_center_checkbtn = 1;
   ctl->trail_checkbtn = 0;
   ctl->restart_btn = 0;
+  ctl->reverse_btn = 0;
 }
 
 static void updateBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl = 1; }
@@ -64,6 +66,7 @@ static void activate(GtkApplication* app, gpointer user_data)
 
   GtkWidget* trail_checkbtn;  // trail behind particles
   GtkWidget* restart_btn;
+  GtkWidget* reverse_btn;
 
   // create new window
   window = gtk_application_window_new(app);
@@ -116,10 +119,6 @@ static void activate(GtkApplication* app, gpointer user_data)
                    (gpointer)trailcheck_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), trail_checkbtn, TRUE, FALSE, 20);
 
-  //  button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-  //  //gtk_container_add(GTK_CONTAINER(window), button_box);
-  //  gtk_box_pack_start(GTK_BOX(boxtl), button_box, TRUE, FALSE, 20);
-  //
   restart_btn = gtk_button_new_with_label("Restart");
   int* restart_ptr = &(((ControlData*)user_data)->restart_btn);
   g_signal_connect(restart_btn, "clicked", G_CALLBACK(updateBtn),
@@ -140,17 +139,17 @@ static void activate(GtkApplication* app, gpointer user_data)
                    (gpointer)gscale_ptr);
   gtk_box_pack_start(GTK_BOX(boxtr), g_scale, TRUE, FALSE, 20);
 
-  s_checkbtn = gtk_check_button_new_with_label("springs");
-  int* scheck_ptr = &(((ControlData*)user_data)->s_checkbtn);
-  g_signal_connect(s_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
-                   (gpointer)scheck_ptr);
-  gtk_box_pack_start(GTK_BOX(boxtr), s_checkbtn, TRUE, FALSE, 20);
+  //s_checkbtn = gtk_check_button_new_with_label("springs");
+  //int* scheck_ptr = &(((ControlData*)user_data)->s_checkbtn);
+  //g_signal_connect(s_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
+  //                 (gpointer)scheck_ptr);
+  //gtk_box_pack_start(GTK_BOX(boxtr), s_checkbtn, TRUE, FALSE, 20);
 
-  s_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
-  double* sscale_ptr = &(((ControlData*)user_data)->s_scale);
-  g_signal_connect(s_scale, "value-changed", G_CALLBACK(updateScale),
-                   (gpointer)sscale_ptr);
-  gtk_box_pack_start(GTK_BOX(boxtr), s_scale, TRUE, FALSE, 20);
+  //s_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
+  //double* sscale_ptr = &(((ControlData*)user_data)->s_scale);
+  //g_signal_connect(s_scale, "value-changed", G_CALLBACK(updateScale),
+  //                 (gpointer)sscale_ptr);
+  //gtk_box_pack_start(GTK_BOX(boxtr), s_scale, TRUE, FALSE, 20);
 
   g_center_checkbtn = gtk_check_button_new_with_label("set mass in center");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_center_checkbtn), TRUE);
@@ -158,6 +157,12 @@ static void activate(GtkApplication* app, gpointer user_data)
   g_signal_connect(g_center_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
                    (gpointer)centercheck_ptr);
   gtk_box_pack_start(GTK_BOX(boxtr), g_center_checkbtn, TRUE, FALSE, 20);
+
+  reverse_btn = gtk_button_new_with_label("Reverse Velocity");
+  int* reverse_ptr = &(((ControlData*)user_data)->reverse_btn);
+  g_signal_connect(reverse_btn, "clicked", G_CALLBACK(updateBtn),
+                   (gpointer)reverse_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtr), reverse_btn, TRUE, FALSE, 20);
 
   gtk_widget_show_all(window);
 }

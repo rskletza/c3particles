@@ -45,7 +45,9 @@ Force gravity(const Particle &p1, const Particle &p2,
   Force result =
       (calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
         glm::vec3 direction = glm::normalize(p2.location - p1.location);
+//        glm::vec3 direction = p2.location - p1.location;
         float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
+        glm::normalize(direction);
 
         return (gforce * direction);
       }));
