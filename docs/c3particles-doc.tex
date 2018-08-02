@@ -54,21 +54,21 @@
 \authorrunning{c3particles}
 % (feature abused for this document to repeat the title also on left hand pages)
 
-\institute{Practical Course "Advanced Software Development with Modern C++"\\Summer Semester 2018\\MSc Tobias Fuchs\\Institute for Computer Science\\
+\institute{Practical Course "Advanced Software Development with Modern C++"\\Summer Term 2018\\Institute for Computer Science\\
 Ludwig-Maximilians-Universit\"at M\"unchen\\
 }
 
 \maketitle
 
 
-\begin{abstract}
-Particle systems are used in many different areas: most prominently in the entertainment industry in games and movies and for simulations and visualizations scientific research. No matter the area of application, the basic rules governing these systems are the same: the laws of physics. c3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
-
-%keywords{network operating systems, programmable networks, Software-Defined Networking, SDN-controllers}
-\end{abstract}
+%\begin{abstract}
+%
+%
+%%keywords{network operating systems, programmable networks, Software-Defined Networking, SDN-controllers}
+%\end{abstract}
 
 \section{Introduction}
-
+Particle systems are used in many different areas: most prominently in the entertainment industry in games and movies and for simulations and visualizations scientific research. No matter the area of application, the basic rules governing these systems are the same: the laws of physics. c3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
 
 
 \section{Short Recap of Physics}
@@ -105,15 +105,36 @@ Analogous to $C_v$, $C_s$ is equal to the location at t-1.
 These formulas serve as the foundations of the physical model of the particle system. 
 
 \section{Modeling the Particle System}
+what are elements of the system and how do we get them (especially the forces)
+
 \begin{itemize}
 \item elements of the system: particle (newtonian object)
 \item force
-
-\item $\rightarrow$ concepts
-
 \item particle is passive, it doesn't "care" where the force is coming from $\rightarrow$ need some way to apply a force to a particle
 \item update at each time step
 \end{itemize}
+
+\subsection{Concepts}
+
+\paragraph{Particle $\ll$ Force}
+applies a force to a particle using the formulas \ref{eq:vel} and \ref{eq:loc}
+
+\paragraph{Force calc\_force(Particle, Particle, Function)}
+calculates a force between two particles using the supplied function, when given the same particle twice, it returns the additive identity
+
+\paragraph{Force gravity(Particle, Particle, List params)}
+a specialization of calc\_force for calculating the gravitational force between two particles (is not actually a concept, but shows what calc\_force is capable of)
+
+\paragraph{Force accumulate(Particle, ParticleContainer, Function)}
+calc\_force for p with each other p in the container and reduce (addition) to one force
+
+\paragraph{Force accumulate(Particle, ParticleContainer, List params, Function)}
+use a pre-defined function to calculate the forces, pass initializer list for parameters
+
+paragraph{Force accumulate(List forces)}
+sum up a set of forces
+
+%examples why it is cool: reverse, 
 
 \section{Implementation}
 

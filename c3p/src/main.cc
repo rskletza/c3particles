@@ -20,6 +20,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <c3p/common/shader.h>
+#include <c3p/common/camera.h>
+
 #include <c3p/control_window.h>
 #include <c3p/newtonian_objects.h>
 #include <c3p/particle_functions.h>
@@ -31,15 +33,32 @@ using namespace c3p;
 
 GLFWwindow* window;
 
-bool mousedown;  // TODO eek no global variables!
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow *window);
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-{
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    mousedown = true;
-  else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-    mousedown = false;
-}
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
+
+//void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+//{
+//  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+//    mousedown = true;
+//  else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+//    mousedown = false;
+//}
 
 int main(void)
 {
@@ -75,7 +94,9 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Open a window and create its OpenGL context
-    window = glfwCreateWindow(1280, 1400, "c3particles", NULL, NULL);
+    
+    window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "c3particles", NULL, NULL);
+    //window = glfwCreateWindow(1280, 1400, "c3particles", NULL, NULL);
 
     if (window == NULL)
       {
@@ -87,7 +108,7 @@ int main(void)
         glfwTerminate();
         return -1;
       }
-    glfwMakeContextCurrent(window);
+
     glewExperimental = true;  // Needed for core profile Initialize GLEW
     if (glewInit() != GLEW_OK)
       {
@@ -97,10 +118,17 @@ int main(void)
         return -1;
       }
 
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
+//    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // black background
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -129,16 +157,15 @@ int main(void)
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-        glm::vec3(0, 0, -200),  // Camera is at (x,y,z), in World Space
+        //glm::vec3(0, 0, -200),  // Camera is at (x,y,z), in World Space
+        glm::vec3(0, 0, -50),  // Camera is at (x,y,z), in World Space
         glm::vec3(0, 0, 0),     // and looks at the origin
         glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
         );
     // Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model = glm::mat4(1.0f);
     // Our ModelViewProjection : multiplication of our 3 matrices
-    glm::mat4 mvp =
-        Projection * View *
-        Model;  // Remember, matrix multiplication is the other way around
+    glm::mat4 mvp = Projection * View * Model; 
 
     glPointSize(5.0f);
     c3p::ParticleSystem ps(50);
@@ -147,7 +174,16 @@ int main(void)
 
     do
       {
+        //TODO copy control struct
+        //synchronize
         // clear the screen and clear the depth
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        processInput(window);
+
         if (ctl_p->trail_checkbtn)
           {
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -172,26 +208,9 @@ int main(void)
         // use own shader
         glUseProgram(shaders);
 
-        // update camera from controls
-        View = glm::lookAt(
-            glm::vec3(0, 0, ctl_p->dolly_scale),
-            glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
-            glm::vec3(0, 1,
-                      0)  // Head is up (set to 0,-1,0 to look upside-down)
-            );
-        glm::mat4 mvp = Projection * View * Model;
 
         // TODO physics engine in own thread --> sleep
         // TODO measure time since last swap buffers (std::chrono)
-
-        //      if(ctl_p->g_center_checkbtn) { ps.addGForce(glm::vec3{0, 0, 0},
-        //      50); }
-        //      //            ps.addGForce(glm::vec3{-50,0,0}, 50);
-        //      if(ctl_p->g_checkbtn)
-        //      {
-        //        ps.setGexponent(ctl_p->g_scale);
-        //        ps.nbodyGravity();
-        //      }
 
         if (ctl_p->restart_btn)
           {
@@ -233,8 +252,20 @@ int main(void)
         });
 
         ps.update();
-        p_renderer.renderPoints(mvp, MatrixID);
-        //p_renderer.renderCubes(mvp, MatrixID);
+        //have for out here
+        //p_renderer.renderPoints(mvp, MatrixID);
+        p_renderer.renderCubes(mvp, MatrixID);
+        
+        // update camera from controls
+//        View = glm::lookAt(
+//            glm::vec3(0, 0, ctl_p->dolly_scale),
+//            glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
+//            glm::vec3(0, 1,
+//                      0)  // Head is up (set to 0,-1,0 to look upside-down)
+//            );
+        Projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        View = camera.GetViewMatrix();
+        glm::mat4 mvp = Projection * View * Model;
 
         // Swap buffers
 
@@ -258,3 +289,55 @@ int main(void)
 
   return 0;
 }
+
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  std::cout << "scrolling" << std::endl;
+    camera.ProcessMouseScroll(yoffset);
+}
+

@@ -60,14 +60,14 @@ void ParticleSystem::setRandom()
           p.size = r;
         }
       //      p.mass = 10;
-      p.location[2] = 0.0;
+//      p.location[2] = 0.0;
       std::cout << p.size << std::endl;
       p.origin = p.location;
-      p.velocity = glm::normalize(
-                       glm::cross(glm::vec3{p.location[0],
-                       p.location[1], 0.0},
-                                  glm::vec3{0.0, 0.0, 1.0})) *
-                   0.2f;
+//      p.velocity = glm::normalize(
+//                       glm::cross(glm::vec3{p.location[0],
+//                       p.location[1], 0.0},
+//                                  glm::vec3{0.0, 0.0, 1.0})) *
+//                   0.2f;
       //          p.velocity = glm::normalize(glm::vec3{p.location[0],
       //          p.location[1], 0.0}) * -1.0f;
     }
@@ -80,11 +80,11 @@ void ParticleSystem::reset()
       p.location = p.origin;
 //      p.location[2] = 0.0;
       p.velocity *= 0;
-      p.velocity = glm::normalize(
-                       glm::cross(glm::vec3{p.location[0],
-                       p.location[1], 0.0},
-                                  glm::vec3{0.0, 0.0, 1.0})) *
-                   0.2f;
+//      p.velocity = glm::normalize(
+//                       glm::cross(glm::vec3{p.location[0],
+//                       p.location[1], 0.0},
+//                                  glm::vec3{0.0, 0.0, 1.0})) *
+//                   0.2f;
     }
 }
 
