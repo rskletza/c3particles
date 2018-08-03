@@ -1,3 +1,9 @@
+///
+/// This is not my original code!
+/// It is from the opengl tutorial at
+/// https://learnopengl.com/Getting-started/Camera
+///
+
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -17,7 +23,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW         = -90.0f;
 const float PITCH       =  0.0f;
-const float SPEED       =  2.5f;
+const float SPEED       =  20.0f;
 const float SENSITIVITY =  0.1f;
 const float ZOOM        =  45.0f;
 

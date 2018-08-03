@@ -40,33 +40,22 @@ class ParticleSystem
   // movement around 0,0,0)
   void setRandom();
 
+  /// reset the location and velocity of each particle to initial values
   void reset();
 
+  /// invert the velocity vector of each particle (basically reverse in time)
   void reverse();
 
-  // Update the values (location, velocity, etc) of all the particles)
+  /// calculate the new velocity and location from the acceleration of all the particles 
   void update();
 
-  // Apply some force to all the particles
-  //  void applyForceAll(vec force);
-
-  // Add an attractor to the system. It attracts all the particles with constant
-  // strength
-  //  void addAttractor(vec point, float strength);
-
-  // Enable origin force --> particles are attracted to their origin
-  //  void gravitateOrigin(float strength);
-
-  // Simulate gravitational forces on all the particles
-  //  void nbodyGravity();
-
-  // Add a gravitational mass to the system
-  //  void addGForce(vec position, float mass);
-
+  /// change the exponent of the gravitational constant for the particle system
   void setGexponent(int exp);
 
+  /// read gravitational constant
   float g_constant() const;
 
+  /// return a reference to the particle container (where all the particles are stored)
   const ParticleContainer &particles() const;
 
   bool empty() const;

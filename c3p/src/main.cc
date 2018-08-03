@@ -39,33 +39,34 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 1400;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 100.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+bool lmousedown = false;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-//void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
-//{
-//  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-//    mousedown = true;
-//  else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-//    mousedown = false;
-//}
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    lmousedown = true;
+  else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    lmousedown = false;
+}
 
 int main(void)
 {
-  ControlData* ctl_p;  // struct to hold the data from the control window
-  struct ControlData ctl;
+  ParticleControlData* ctl_p;  // struct to hold the data from the control window
+  struct ParticleControlData ctl;
   ctl_p = &ctl;
-  initControls(ctl_p);
+  initParticleControls(ctl_p);
 
   std::thread ctl_window([ctl_p] {
     GtkApplication* app;
@@ -109,6 +110,8 @@ int main(void)
         return -1;
       }
 
+    glfwMakeContextCurrent(window);
+
     glewExperimental = true;  // Needed for core profile Initialize GLEW
     if (glewInit() != GLEW_OK)
       {
@@ -118,8 +121,8 @@ int main(void)
         return -1;
       }
 
-    glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
@@ -128,7 +131,6 @@ int main(void)
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-//    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     // black background
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -207,6 +209,18 @@ int main(void)
 
         // use own shader
         glUseProgram(shaders);
+        //
+        // update camera from controls
+//        View = glm::lookAt(
+//            glm::vec3(0, 0, ctl_p->dolly_scale),
+//            glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
+//            glm::vec3(0, 1,
+//                      0)  // Head is up (set to 0,-1,0 to look upside-down)
+//            );
+        Projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+        View = camera.GetViewMatrix();
+        glm::mat4 mvp = Projection * View * Model;
+
 
 
         // TODO physics engine in own thread --> sleep
@@ -256,17 +270,6 @@ int main(void)
         //p_renderer.renderPoints(mvp, MatrixID);
         p_renderer.renderCubes(mvp, MatrixID);
         
-        // update camera from controls
-//        View = glm::lookAt(
-//            glm::vec3(0, 0, ctl_p->dolly_scale),
-//            glm::vec3(ctl_p->pan_scale, ctl_p->tilt_scale, 0),
-//            glm::vec3(0, 1,
-//                      0)  // Head is up (set to 0,-1,0 to look upside-down)
-//            );
-        Projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-        View = camera.GetViewMatrix();
-        glm::mat4 mvp = Projection * View * Model;
-
         // Swap buffers
 
         //glReadBuffer(GL_FRONT);
@@ -330,14 +333,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
+  if (lmousedown)
+  {
     camera.ProcessMouseMovement(xoffset, yoffset);
+  }
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-  std::cout << "scrolling" << std::endl;
     camera.ProcessMouseScroll(yoffset);
 }
 

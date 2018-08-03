@@ -1,4 +1,9 @@
-//copied from opengltutorials
+///
+/// This is not my original code!
+/// It is from the opengl tutorial at
+/// http://www.opengl-tutorial.org/
+///
+
 #ifndef SHADER_HPP
 #define SHADER_HPP
 

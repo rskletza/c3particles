@@ -13,14 +13,6 @@ using ParticleContainer = std::vector<Particle>;
 using vec = glm::vec3;  // std::array<float, 3>;
 using self_t = ParticleSystem;
 
-// Apply a force
-// Particle implements a concept of an object that is subject to gravitation
-// void applyForce(glm::vec3 force, Particle &p)
-//{
-//  force /= p.mass;          // f = m*a
-//  p.acceleration += force;  // add the force to the object's acceleration
-//}
-
 // ParticleSystem::ParticleSystem() = delete;
 
 ParticleSystem::ParticleSystem(size_t size)
@@ -60,14 +52,12 @@ void ParticleSystem::setRandom()
           p.size = r;
         }
       //      p.mass = 10;
-//      p.location[2] = 0.0;
-      std::cout << p.size << std::endl;
       p.origin = p.location;
-//      p.velocity = glm::normalize(
-//                       glm::cross(glm::vec3{p.location[0],
-//                       p.location[1], 0.0},
-//                                  glm::vec3{0.0, 0.0, 1.0})) *
-//                   0.2f;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0],
+                       p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.2f;
       //          p.velocity = glm::normalize(glm::vec3{p.location[0],
       //          p.location[1], 0.0}) * -1.0f;
     }
@@ -78,13 +68,12 @@ void ParticleSystem::reset()
   for (Particle &p : _particles)
     {
       p.location = p.origin;
-//      p.location[2] = 0.0;
       p.velocity *= 0;
-//      p.velocity = glm::normalize(
-//                       glm::cross(glm::vec3{p.location[0],
-//                       p.location[1], 0.0},
-//                                  glm::vec3{0.0, 0.0, 1.0})) *
-//                   0.2f;
+      p.velocity = glm::normalize(
+                       glm::cross(glm::vec3{p.location[0],
+                       p.location[1], 0.0},
+                                  glm::vec3{0.0, 0.0, 1.0})) *
+                   0.2f;
     }
 }
 
@@ -120,62 +109,6 @@ void ParticleSystem::update()
     }
 //    );
 }
-
-// void ParticleSystem::applyForceAll(glm::vec3 force)
-//{
-//  for (Particle &p : _particles)
-//    {
-//      applyForce(force, p);
-//    }
-//}
-//
-// void ParticleSystem::addAttractor(glm::vec3 point, float strength)
-//{
-//  for (Particle &p : _particles)
-//    {
-//      glm::vec3 force = glm::normalize(point - p.location) * strength;
-//      applyForce(force, p);
-//    }
-//}
-//
-//// enable origin force --> particles are attracted to their origin
-// void ParticleSystem::gravitateOrigin(float strength)
-//{
-//  for (Particle &p : _particles)
-//    {
-//      glm::vec3 force = glm::normalize(p.origin - p.location) * strength;
-//      applyForce(force, p);
-//    }
-//}
-//
-//// simulate gravitational forces on all the particles
-// void ParticleSystem::nbodyGravity()
-//{
-//  for (Particle &p : _particles)
-//    {
-//      float gforce;
-//      glm::vec3 direction;
-//      for (Particle &other : _particles)
-//        {
-//          if (p.location == other.location) continue;
-//          direction = glm::normalize(other.location - p.location);
-//          gforce = _G * (p.mass * other.mass) / pow(glm::length(direction),
-//          2);
-//        }
-//      applyForce(gforce * direction, p);
-//    }
-//}
-//
-// void ParticleSystem::addGForce(glm::vec3 position, float mass)
-//{
-//  for (Particle &p : _particles)
-//    {
-//      glm::vec3 direction = glm::normalize(position - p.location);
-//      float gforce = _G * (p.mass * mass) / pow(glm::length(direction), 2);
-//
-//      applyForce(gforce * direction, p);
-//    }
-//}
 
 void ParticleSystem::setGexponent(int exp) { _G = 1.0 * std::pow(10, exp); }
 

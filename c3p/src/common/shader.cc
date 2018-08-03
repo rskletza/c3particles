@@ -1,4 +1,8 @@
-// copied from opengltutorials
+///
+/// This is not my original code!
+/// It is from the opengl tutorial at
+/// http://www.opengl-tutorial.org/
+///
 
 #include <stdio.h>
 #include <string>

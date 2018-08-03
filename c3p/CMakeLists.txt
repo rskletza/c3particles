@@ -42,6 +42,7 @@ add_executable(
     src/particle_renderer.cc
     src/particle_functions.cc
     src/newtonian_objects.cc
+    #    src/control_window.c
     #    src/particle_container.cc
     src/common/shader.cc
 )
