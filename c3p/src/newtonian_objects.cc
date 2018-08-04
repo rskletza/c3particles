@@ -1,5 +1,9 @@
 #include <c3p/newtonian_objects.h>
 
+#include <cmath>
+#include <ctime>
+#include <iostream>
+
 namespace c3p
 {
 //  inline float Mass(float mass) {return mass};
@@ -17,6 +21,32 @@ std::ostream &operator<<(std::ostream &os, const Particle &p)
      << ", " << p.acceleration.z << ")\n";
   os << "mass: " << p.mass << "\n";
   return os;
+}
+
+Particle & randomize(Particle & p)
+{
+//  std::srand(std::time(nullptr));
+  float r; 
+  for (int i = 0; i < 3; ++i)
+    {
+      r = rand();
+      r = r / (float)RAND_MAX;
+      p.color[i] = r;
+      p.location[i] = r * 60 - 30;
+    }
+    r = rand(); 
+    r /= (float)RAND_MAX;
+    p.mass = r * 10 + 100;
+    p.size = r;
+
+    p.origin = p.location;
+    p.velocity = glm::normalize(
+                     glm::cross(glm::vec3{p.location[0],
+                     p.location[1], 0.0},
+                                glm::vec3{0,0,1})) * 0.2f;
+  //          p.velocity = glm::normalize(glm::vec3{p.location[0],
+  //          p.location[1], 0.0}) * -1.0f;
+  return p;
 }
 
 using Force = glm::vec3;

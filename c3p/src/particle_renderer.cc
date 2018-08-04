@@ -7,48 +7,6 @@ namespace c3p
 {
 class ParticleSystem;
 
-GLfloat* fill_vb_cube(GLfloat* ptr, const glm::vec3 pos, const float width) //position of center and width
-{
-    float w = width/2.0f;
-    GLfloat cube_vertices[] =
-    {
-      // front
-//    -1.0, -1.0,  1.0,
-//     1.0, -1.0,  1.0,
-//     1.0,  1.0,  1.0,
-//    -1.0,  1.0,  1.0,
-    (pos.x - w), (pos.y - w), (pos.z + w),
-    (pos.x + w), (pos.y - w), (pos.z + w),
-    (pos.x + w), (pos.y + w), (pos.z + w),
-    (pos.x - w), (pos.y + w), (pos.z + w),
-
-    // back
-//    -1.0, -1.0, -1.0,
-//     1.0, -1.0, -1.0,
-//     1.0,  1.0, -1.0,
-//    -1.0,  1.0, -1.0
-    (pos.x - w), (pos.y - w), (pos.z - w),
-    (pos.x + w), (pos.y - w), (pos.z - w),
-    (pos.x + w), (pos.y + w), (pos.z - w),
-    (pos.x - w), (pos.y + w), (pos.z - w),
-    };
-    ptr = cube_vertices;
-    return ptr;
-}
-
-GLfloat* fill_cb_cube(GLfloat* ptr, const glm::vec3 color)
-{
-  GLfloat cube_colors[24];
-  for (int i = 0; i<24; i+=3)
-  {
-    cube_colors[i] = color[0];
-    cube_colors[i+1] = color[1];
-    cube_colors[i+2] = color[2];
-  }
-  ptr = cube_colors;
-  return ptr;
-}
-
 using ParticleContainerFk = std::vector<Particle>;
 
 //    ParticleRenderer::ParticleRenderer() = delete;
@@ -62,7 +20,7 @@ ParticleRenderer::~ParticleRenderer() = default;
 
 // assignment and comparison should not be needed since there should always only
 // be one renderer per particle system
-void ParticleRenderer::renderCubes(glm::mat4 &mvp, GLuint MatrixID)
+void ParticleRenderer::renderCubes()
 {
   for (const Particle &p : _particlecontainer)
     {
@@ -158,11 +116,8 @@ void ParticleRenderer::renderCubes(glm::mat4 &mvp, GLuint MatrixID)
       glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
       glDrawElements(GL_TRIANGLES, size/sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
-     // glDrawArrays(GL_POINTS, 0, 1);  // 1 vertex
       glDisableVertexAttribArray(0);
       glDisableVertexAttribArray(1);
-
-      glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
       glDeleteBuffers(1, &elementbuffer);
       glDeleteBuffers(1, &vertexbuffer);
@@ -171,7 +126,7 @@ void ParticleRenderer::renderCubes(glm::mat4 &mvp, GLuint MatrixID)
 }
 
 // calculate color and vertex buffers for each particle and pass them to OpenGL
-void ParticleRenderer::renderPoints(glm::mat4 &mvp, GLuint MatrixID)
+void ParticleRenderer::renderPoints()
 {
   // for each particle. for now will use
   for (const Particle &p : _particlecontainer)
@@ -219,8 +174,6 @@ void ParticleRenderer::renderPoints(glm::mat4 &mvp, GLuint MatrixID)
       glDrawArrays(GL_POINTS, 0, 1);  // 1 vertex
       glDisableVertexAttribArray(0);
       glDisableVertexAttribArray(1);
-
-      glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
       glDeleteBuffers(1, &vertexbuffer);
       glDeleteBuffers(1, &colorbuffer);

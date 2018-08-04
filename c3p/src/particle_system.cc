@@ -15,6 +15,7 @@ using self_t = ParticleSystem;
 
 // ParticleSystem::ParticleSystem() = delete;
 
+//TODO std::generate with randomize
 ParticleSystem::ParticleSystem(size_t size)
     : _G(10e-4)  // universal gravitational constant (actually 6.67*10^-11)
     , _particles(size)
@@ -39,28 +40,7 @@ self_t ParticleSystem::operator=(self_t &&other)
 // movement around 0,0,0)
 void ParticleSystem::setRandom()
 {
-  //  std::srand(std::time(nullptr));
-  for (Particle &p : _particles)
-    {
-      for (int i = 0; i < 3; ++i)
-        {
-          float r = rand();
-          r = r / (float)RAND_MAX;
-          p.color[i] = r;
-          p.location[i] = r * 60 - 30;
-          p.mass = r * 10 + 100;
-          p.size = r;
-        }
-      //      p.mass = 10;
-      p.origin = p.location;
-      p.velocity = glm::normalize(
-                       glm::cross(glm::vec3{p.location[0],
-                       p.location[1], 0.0},
-                                  glm::vec3{0.0, 0.0, 1.0})) *
-                   0.2f;
-      //          p.velocity = glm::normalize(glm::vec3{p.location[0],
-      //          p.location[1], 0.0}) * -1.0f;
-    }
+  for (Particle &p : _particles) { randomize(p); }
 }
 
 void ParticleSystem::reset()
@@ -69,12 +49,17 @@ void ParticleSystem::reset()
     {
       p.location = p.origin;
       p.velocity *= 0;
-      p.velocity = glm::normalize(
-                       glm::cross(glm::vec3{p.location[0],
-                       p.location[1], 0.0},
-                                  glm::vec3{0.0, 0.0, 1.0})) *
-                   0.2f;
+//      p.velocity = glm::normalize(
+//                       glm::cross(glm::vec3{p.location[0],
+//                       p.location[1], 0.0},
+//                                  glm::vec3{0.0, 0.0, 1.0})) *
+//                   0.2f;
     }
+}
+
+void ParticleSystem::add(Particle && p)
+{
+  _particles.push_back(p);
 }
 
 void ParticleSystem::reverse()

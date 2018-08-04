@@ -45,6 +45,9 @@ class ParticleSystem
 
   /// invert the velocity vector of each particle (basically reverse in time)
   void reverse();
+  
+  /// add a new particle to the system
+  void add(Particle &&);
 
   /// calculate the new velocity and location from the acceleration of all the particles 
   void update();

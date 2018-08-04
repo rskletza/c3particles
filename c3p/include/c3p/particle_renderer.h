@@ -21,9 +21,6 @@ class ParticleSystem;
 
 using ParticleContainerFk = std::vector<Particle>;
 
-GLfloat* fill_vb_cube(GLfloat* ptr, const glm::vec3 pos, const float w); //position of center and width
-GLfloat* fill_cb_cube(GLfloat* ptr, const glm::vec3 color); 
-
 class ParticleRenderer
 {
  public:
@@ -37,8 +34,8 @@ class ParticleRenderer
 
   /// Calculate color and vertex buffers for each particle and pass them to
   /// OpenGL
-  void renderPoints(glm::mat4 &mvp, GLuint MatrixID);
-  void renderCubes(glm::mat4 &mvp, GLuint MatrixID);
+  void renderPoints();
+  void renderCubes();
 
  private:
   const ParticleContainerFk &_particlecontainer;

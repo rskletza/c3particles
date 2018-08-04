@@ -26,10 +26,12 @@ typedef struct ParticleControlData
   int s_checkbtn;  // spring
   double s_scale;
   int g_center_checkbtn;
+  int center_dropdown;
 
   int trail_checkbtn;
   int restart_btn;
   int reverse_btn;
+  int pause_btn;
 } ParticleControlData;
 
 static void initCameraControls(CameraControlData* ctl)
@@ -44,17 +46,27 @@ static void initParticleControls(ParticleControlData* ctl)
   ctl->g_checkbtn = 1;
   ctl->g_scale = -4;
   ctl->s_checkbtn = 0;
-  ctl->s_scale = 4;
+  ctl->s_scale = 0.5;
   ctl->g_center_checkbtn = 1;
+  ctl->center_dropdown = 0;
   ctl->trail_checkbtn = 0;
   ctl->restart_btn = 0;
   ctl->reverse_btn = 0;
+  ctl->pause_btn = 0;
 }
 
-static void updateBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl = 1; }
+static void clickBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl = 1; }
+
+static void updateBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl ^= 1; }
+
 static void updateScale(GtkRange* scale, gpointer ctl)
 {
   *(double*)ctl = gtk_range_get_value(scale);
+}
+
+static void dropdownChange(GtkComboBox *dd, gpointer ctl)
+{
+  *(int*)ctl = gtk_combo_box_get_active(dd);
 }
 
 static void updateCheckbtn(GtkToggleButton* btn, gpointer ctl)
@@ -138,10 +150,12 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   GtkWidget* s_checkbtn;  // spring
   GtkWidget* s_scale;
   GtkWidget* g_center_checkbtn;
+  GtkWidget* center_dropdown;
 
   GtkWidget* trail_checkbtn;  // trail behind particles
   GtkWidget* restart_btn;
   GtkWidget* reverse_btn;
+  GtkWidget* pause_btn;
 
   // create new window
   window = gtk_application_window_new(app);
@@ -171,7 +185,7 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
 
   restart_btn = gtk_button_new_with_label("Restart");
   int* restart_ptr = &(((ParticleControlData*)user_data)->restart_btn);
-  g_signal_connect(restart_btn, "clicked", G_CALLBACK(updateBtn),
+  g_signal_connect(restart_btn, "clicked", G_CALLBACK(clickBtn),
                    (gpointer)restart_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), restart_btn, TRUE, FALSE, 20);
 
@@ -189,30 +203,47 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
                    (gpointer)gscale_ptr);
   gtk_box_pack_start(GTK_BOX(boxtr), g_scale, TRUE, FALSE, 20);
 
-  //s_checkbtn = gtk_check_button_new_with_label("springs");
-  //int* scheck_ptr = &(((ParticleControlData*)user_data)->s_checkbtn);
-  //g_signal_connect(s_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
-  //                 (gpointer)scheck_ptr);
-  //gtk_box_pack_start(GTK_BOX(boxtr), s_checkbtn, TRUE, FALSE, 20);
+  s_checkbtn = gtk_check_button_new_with_label("springs");
+  int* scheck_ptr = &(((ParticleControlData*)user_data)->s_checkbtn);
+  g_signal_connect(s_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
+                   (gpointer)scheck_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), s_checkbtn, TRUE, FALSE, 20);
 
-  //s_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
-  //double* sscale_ptr = &(((ParticleControlData*)user_data)->s_scale);
-  //g_signal_connect(s_scale, "value-changed", G_CALLBACK(updateScale),
-  //                 (gpointer)sscale_ptr);
-  //gtk_box_pack_start(GTK_BOX(boxtr), s_scale, TRUE, FALSE, 20);
+  s_scale = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0.1, 1, 0.1);
+  gtk_range_set_value(GTK_RANGE(s_scale), ((ParticleControlData*)user_data)->s_scale);
+  double* sscale_ptr = &(((ParticleControlData*)user_data)->s_scale);
+  g_signal_connect(s_scale, "value-changed", G_CALLBACK(updateScale),
+                   (gpointer)sscale_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), s_scale, TRUE, FALSE, 20);
 
-  g_center_checkbtn = gtk_check_button_new_with_label("set mass in center");
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_center_checkbtn), TRUE);
-  int* centercheck_ptr = &(((ParticleControlData*)user_data)->g_center_checkbtn);
-  g_signal_connect(g_center_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
-                   (gpointer)centercheck_ptr);
-  gtk_box_pack_start(GTK_BOX(boxtr), g_center_checkbtn, TRUE, FALSE, 20);
+//  g_center_checkbtn = gtk_check_button_new_with_label("set mass in center");
+//  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_center_checkbtn), TRUE);
+//  int* centercheck_ptr = &(((ParticleControlData*)user_data)->g_center_checkbtn);
+//  g_signal_connect(g_center_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
+//                   (gpointer)centercheck_ptr);
+//  gtk_box_pack_start(GTK_BOX(boxtr), g_center_checkbtn, TRUE, FALSE, 20);
+  center_dropdown = gtk_combo_box_text_new();
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(center_dropdown), "0", "none");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(center_dropdown), "1", "mass");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(center_dropdown), "2", "spring");
+  gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(center_dropdown), "3", "attractor");
+  int* centerdd_ptr = &(((ParticleControlData*)user_data)->center_dropdown);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(center_dropdown), ((ParticleControlData*)user_data)->center_dropdown);
+  g_signal_connect(center_dropdown, "changed", G_CALLBACK(dropdownChange),
+                   (gpointer)centerdd_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtr), center_dropdown, TRUE, FALSE, 20);
 
   reverse_btn = gtk_button_new_with_label("Reverse Velocity");
   int* reverse_ptr = &(((ParticleControlData*)user_data)->reverse_btn);
-  g_signal_connect(reverse_btn, "clicked", G_CALLBACK(updateBtn),
+  g_signal_connect(reverse_btn, "clicked", G_CALLBACK(clickBtn),
                    (gpointer)reverse_ptr);
   gtk_box_pack_start(GTK_BOX(boxtr), reverse_btn, TRUE, FALSE, 20);
+
+  pause_btn = gtk_button_new_with_label("Pause/Resume");
+  int* pause_ptr = &(((ParticleControlData*)user_data)->pause_btn);
+  g_signal_connect(pause_btn, "clicked", G_CALLBACK(updateBtn),
+                   (gpointer)pause_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtr), pause_btn, TRUE, FALSE, 20);
 
   gtk_widget_show_all(window);
 }

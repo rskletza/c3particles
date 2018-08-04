@@ -44,7 +44,6 @@ Force gravity(const Particle &p1, const Particle &p2,
 {
   Force result =
       (calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
-//        glm::vec3 direction = glm::normalize(p2.location - p1.location);
         glm::vec3 direction = p2.location - p1.location;
         float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
         glm::normalize(direction);
@@ -66,18 +65,28 @@ Force spring(const Particle &p1, const Particle &p2,
       calc_force(p1, p2, [p1, p2, params](const Particle &, const Particle &) {
         // f = k*x (k is constant and x
         Spring s(params);  // use params to create spring
-        std::cout << s.length << "<- length , const ->" << s.constant
-                  << std::endl;
-        std::cout << "p2: " << p2 << "p1: " << p1 << std::endl;
         glm::vec3 direction = p2.location - p1.location;
-        std::cout << "displacement: " << (s.length - glm::length(direction));
         float magnitude = -1 * s.constant * (s.length - glm::length(direction));
         glm::normalize(direction);
-        std::cout << "direction: " << direction << ", magnitude: " << magnitude
-                  << std::endl;
 
         return direction * magnitude;
       });
+      return result;
+}
+
+Force simple_attract(const Particle &p1, const Particle &p2, std::initializer_list<float> params)
+{
+  Force result = calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
+        glm::vec3 direction = glm::normalize(p2.location - p1.location);
+        float force = (p1.mass * p2.mass)/ pow(glm::length(direction), 2);
+        std::cout << "force: " << force << ", direction: " << direction << std::endl;
+        return (force * direction);
+      });
+  for (auto c : params)
+    {
+      result *= c;
+    }
+  return result;
 }
 
 // calc_force for p with each other p in ps and reduce (addition) to one force

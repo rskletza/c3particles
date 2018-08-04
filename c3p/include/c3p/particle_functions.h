@@ -39,6 +39,10 @@ Force gravity(const Particle &p1, const Particle &p2,
 Force spring(const Particle &p1, const Particle &p2,
              std::initializer_list<float> G);
 
+// calculates the force between two particles as if they were attached with a constant spring that doesn't change with distance
+Force simple_attract(const Particle &p1, const Particle &p2,
+             std::initializer_list<float> G);
+
 // calc_force for p with each other p in ps and reduce (addition) to one force
 // disadvantage: for each pair of particles, the force is calculated twice
 // TODO instead of ParticleContainer template with range/sequence of particles

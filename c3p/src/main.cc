@@ -9,6 +9,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <cmath>
 
 #include <gtk/gtk.h>
 
@@ -48,10 +49,15 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 bool lmousedown = false;
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model = glm::mat4(1.0f);
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
+
+//debug
+bool stop = 0;
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -97,7 +103,6 @@ int main(void)
     // Open a window and create its OpenGL context
     
     window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "c3particles", NULL, NULL);
-    //window = glfwCreateWindow(1280, 1400, "c3particles", NULL, NULL);
 
     if (window == NULL)
       {
@@ -126,7 +131,7 @@ int main(void)
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -142,11 +147,16 @@ int main(void)
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
-    GLuint shaders = LoadShaders("../shaders/simple_vert_shader.glsl",
-                                 "../shaders/simple_frag_shader.glsl");
+    //GLuint shaders = LoadShaders("../shaders/simple_vert_shader.glsl",
+    //                             "../shaders/simple_frag_shader.glsl");
+    GLuint shaders = LoadShaders("../shaders/blur_vert_shader.glsl",
+                                 "../shaders/blur_frag_shader.glsl");
+    //GLuint shaders = LoadShaders("../shaders/glow_vert_shader.glsl",
+    //                             "../shaders/glow_frag_shader.glsl");
 
     // Get a handle for shaders
     GLuint MatrixID = glGetUniformLocation(shaders, "MVP");
+    GLuint oldMatrixID = glGetUniformLocation(shaders, "oldMVP");
 
     // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1
     // unit
@@ -164,13 +174,13 @@ int main(void)
         glm::vec3(0, 0, 0),     // and looks at the origin
         glm::vec3(0, 1, 0)  // Head is up (set to 0,-1,0 to look upside-down)
         );
-    // Model matrix : an identity matrix (model will be at the origin)
-    glm::mat4 Model = glm::mat4(1.0f);
+//    // Model matrix : an identity matrix (model will be at the origin)
+//    glm::mat4 Model = glm::mat4(1.0f);
     // Our ModelViewProjection : multiplication of our 3 matrices
     glm::mat4 mvp = Projection * View * Model; 
 
     glPointSize(5.0f);
-    c3p::ParticleSystem ps(50);
+    c3p::ParticleSystem ps(100);
     ps.setRandom();
     c3p::ParticleRenderer p_renderer(ps);
 
@@ -194,11 +204,6 @@ int main(void)
           {
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
           }
-        //copy current accumulation buffer to color buffer multiplied by factor
-        glClear(GL_ACCUM_BUFFER_BIT);
-        glAccum(GL_RETURN, 0.95f);
-        glAccum(GL_MULT, 0.5f);
-
 
 //        // Enable depth test
         glEnable(GL_DEPTH_TEST);
@@ -219,10 +224,17 @@ int main(void)
 //            );
         Projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
         View = camera.GetViewMatrix();
+        //
+        //pass old mvp to shaders
+        glUniformMatrix4fv(oldMatrixID, 1, GL_FALSE, &mvp[0][0]);
+
         glm::mat4 mvp = Projection * View * Model;
 
+        //pass mvp to shaders
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
 
+  
         // TODO physics engine in own thread --> sleep
         // TODO measure time since last swap buffers (std::chrono)
 
@@ -241,6 +253,8 @@ int main(void)
         // update gravitational constant
         ps.setGexponent(ctl_p->g_scale);
 
+        if(!ctl_p->pause_btn)
+        {
         //      std::transform(ps.begin(), ps.end(), ps.begin(),
         std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
           if (ctl_p->g_checkbtn)
@@ -250,37 +264,43 @@ int main(void)
                   c3p::gravity);  // gravitational forces between particles
             }
 
-          if (ctl_p->g_center_checkbtn)
-            {
-              // attract to center
-              p << gravity(p, Particle(100.0f), {ps.g_constant()});
-            }
+          switch(ctl_p->center_dropdown)
+          {
+            case 0: break;
+            case 1: p << gravity(p, Particle(100.0f), {ps.g_constant()});
+                    break;
+            case 2: p << spring(p, Particle(), {10, ctl_p->s_scale});
+                    break;
+            case 3: p << simple_attract(p, Particle(10.0), {1});
+                    break;
+            default: break;
+          }
 
           if (ctl_p->s_checkbtn)
             {
               p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
-              Force s = spring(p, Particle(), {5, 0.001});
-              std::cout << s << std::endl;
-              p << std::move(s);
             }
+          if (std::isnan(p.velocity.x))
+          {
+            stop = 1;
+          }
+          std::cout << p << std::endl;
         });
 
         ps.update();
         //have for out here
-        //p_renderer.renderPoints(mvp, MatrixID);
-        p_renderer.renderCubes(mvp, MatrixID);
+        //p_renderer.renderPoints();
+        }
+        p_renderer.renderCubes();
         
         // Swap buffers
 
-        //glReadBuffer(GL_FRONT);
-        //glAccum(GL_ACCUM, 0.9f);
         glfwSwapBuffers(window);
-        glAccum(GL_LOAD, 0.9f);
         glfwPollEvents();
 
       }  // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-           glfwWindowShouldClose(window) == 0);
+           glfwWindowShouldClose(window) == 0 && !stop);
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();
@@ -327,15 +347,20 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float xoffset = (xpos - lastX)*0.1;
+    float yoffset = (lastY - ypos)*(-0.1); // reversed since y-coordinates go from bottom to top
 
     lastX = xpos;
     lastY = ypos;
 
   if (lmousedown)
   {
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::rotate(trans, glm::radians(yoffset), glm::cross(camera.Position, glm::vec3(0.0f, 1.0f, 0.0f)));
+    trans = glm::rotate(trans, glm::radians(xoffset), glm::vec3(0.0f, 1.0f, 0.0f));
+    Model = Model * trans;
+//    camera.ProcessMouseMovement(xoffset, yoffset);
   }
 }
 

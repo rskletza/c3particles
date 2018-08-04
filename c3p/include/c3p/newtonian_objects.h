@@ -47,6 +47,8 @@ using Force = glm::vec3;
 
 std::ostream &operator<<(std::ostream &os, const Particle &p);
 
+Particle & randomize(Particle & p);
+
 // inline glm::vec3 force(glm::vec3 f) { return f; }
 
 std::ostream &operator<<(std::ostream &os, const Force &f);
