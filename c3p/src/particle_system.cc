@@ -49,6 +49,7 @@ void ParticleSystem::reset()
     {
       p.location = p.origin;
       p.velocity *= 0;
+      p.acceleration *= 0;
 //      p.velocity = glm::normalize(
 //                       glm::cross(glm::vec3{p.location[0],
 //                       p.location[1], 0.0},

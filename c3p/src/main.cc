@@ -180,7 +180,7 @@ int main(void)
     glm::mat4 mvp = Projection * View * Model; 
 
     glPointSize(5.0f);
-    c3p::ParticleSystem ps(100);
+    c3p::ParticleSystem ps(5);
     ps.setRandom();
     c3p::ParticleRenderer p_renderer(ps);
 
@@ -282,7 +282,9 @@ int main(void)
             }
           if (std::isnan(p.velocity.x))
           {
-            stop = 1;
+//            stop = 1;
+            ps.reset();
+            return;
           }
           std::cout << p << std::endl;
         });
