@@ -28,6 +28,7 @@ typedef struct ParticleControlData
   int g_center_checkbtn;
   int center_dropdown;
 
+  int cage_checkbtn;
   int trail_checkbtn;
   int restart_btn;
   int reverse_btn;
@@ -53,6 +54,7 @@ static void initParticleControls(ParticleControlData* ctl)
   ctl->restart_btn = 0;
   ctl->reverse_btn = 0;
   ctl->pause_btn = 0;
+  ctl->cage_checkbtn = 0;
 }
 
 static void clickBtn(GtkButton* btn, gpointer ctl) { *(int*)ctl = 1; }
@@ -152,6 +154,7 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   GtkWidget* g_center_checkbtn;
   GtkWidget* center_dropdown;
 
+  GtkWidget* cage_checkbtn;
   GtkWidget* trail_checkbtn;  // trail behind particles
   GtkWidget* restart_btn;
   GtkWidget* reverse_btn;
@@ -182,6 +185,13 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   g_signal_connect(trail_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
                    (gpointer)trailcheck_ptr);
   gtk_box_pack_start(GTK_BOX(boxtl), trail_checkbtn, TRUE, FALSE, 20);
+
+  cage_checkbtn = gtk_check_button_new_with_label("cage");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cage_checkbtn), FALSE);
+  int* cagecheck_ptr = &(((ParticleControlData*)user_data)->cage_checkbtn);
+  g_signal_connect(cage_checkbtn, "toggled", G_CALLBACK(updateCheckbtn),
+                   (gpointer)cagecheck_ptr);
+  gtk_box_pack_start(GTK_BOX(boxtl), cage_checkbtn, TRUE, FALSE, 20);
 
   restart_btn = gtk_button_new_with_label("Restart");
   int* restart_ptr = &(((ParticleControlData*)user_data)->restart_btn);

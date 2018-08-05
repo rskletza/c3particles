@@ -151,8 +151,7 @@ c3particles contains several separate modules (Figure~\ref{fig:sysdia}. The Part
 
 %\begin{itemize}
 %\item system diagram
-%\item particle system would be fairly useless without visualization, however, this is not part of the formal model and so it is also a separate module in the code
-%\item OpenGL is used, however any graphics library could be utilized with an appropriate interface (Particle Renderer) (also would have to use something other than glm::vec3)
+
 %\item for each time step (signaled by OpenGL), the Particle System module calculates the new values for all the particles based on the input given by the user control window. These values are then read by the Particle Renderer and used to fill the vertex buffers depending on the visualization selected (e.g as points or cubes)
 %\item then, the OpenGL Rendering Pipeline renders the frame, using the provided shaders
 %\item as soon as the screenbuffer is swapped, the calculation for the next frame is started
@@ -212,21 +211,35 @@ void ParticleSystem::update()
 \item specializations of calc\_force, e.g. gravity
 \end{itemize}
 
+The concepts and expressions defined above are incorporated into the system's algorithms. For the calculation of the forces it is helpful to split them logically into "inter-particle forces" and "external forces". The former refers to the forces that exist between all pairs of particles (e.g. gravitational forces) and the latter refers to forces that are applied to each particle independently of all others (e.g. wind).
+
+
+
 \subsubsection{Particle Container}
-The particles need to be stored in some data structure. At the moment, this is a simple std::vector<Particle> which provides all the needed operations.
+The particles need to be stored in some data structure. At the moment, this is a std::vector which provides all the needed operations.
 
 \subsection{User Control Window}
 The user controls are implemented with gtk. The control window runs in a different thread that fills a C struct with the values set by the user. These values are then read by the system in order to calculate the desired forces.
 
 \subsection{Particle Renderer}
+The particle renderer iterates over the particles in the particle system and fills the vertex buffers for each one. How the vertex buffers are filled depends on the function called. At the moment, it is possible to render the particles as pixels with no depth perception and uniform size (\emph{c3p::ParticleRenderer::renderPoints}
+or as cubes (\emph{c3p::ParticleRenderer::renderCubes}). The size of the cubes depends on the size of the particle (which, at the moment is dependent on its mass). The vertex buffers are then passed to the OpenGL Rendering Pipeline.
 
 \subsection{Shaders}
 
-\subsection{Graphics Engine (OpenGL)}
+\subsection{Graphics Engine}
+The graphics engine is only secondary for this project. OpenGL was chosen because of its wide-spread use, however, with an appropriate particle renderer, any one could be used.
 
+\subsection{Optimization}
+\begin{itemize}
+\item force matrix? 
+\item parallelize particle calculation (works very well, because applyforce only updates acceleration, so location and velocity are unchanged until all forces have been calculated)
+\end{itemize}
 
-
-
+\section{Future Work}
+\begin{itemize}
+\item binary space partitioning
+\end{itemize}
 
 
 

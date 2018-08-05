@@ -10,6 +10,7 @@
 #include <thread>
 #include <vector>
 #include <cmath>
+#include <chrono>
 
 #include <gtk/gtk.h>
 
@@ -31,6 +32,7 @@
 #include <c3p/force_matrix.h>
 
 using namespace c3p;
+using namespace std::chrono;
 
 GLFWwindow* window;
 
@@ -56,8 +58,10 @@ bool lmousedown = false;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-//debug
-bool stop = 0;
+//time measurements
+//microseconds sum_time(0);
+long int sum_time;
+double render_passes = 0;
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -180,11 +184,11 @@ int main(void)
     glm::mat4 mvp = Projection * View * Model; 
 
     glPointSize(5.0f);
-    c3p::ParticleSystem ps(2);
+    c3p::ParticleSystem ps(100);
     ps.setRandom();
     c3p::ParticleRenderer p_renderer(ps);
     c3p::ForceMatrix fm(ps);
-    std::cout << fm << std::endl;
+    float cage_width_half = 30; //contain the particles in a cage with side length 200
 
     do
       {
@@ -258,20 +262,42 @@ int main(void)
         if(!ctl_p->pause_btn)
         {
 
-          //first, calculate all inter-particle forces
-          if (ctl_p->g_checkbtn)
-            {
-              fm.accumulate(c3p::gravity, {ps.g_constant()});  // gravitational forces between particles
-              std::cout << fm << std::endl;
-            }
+          auto t1 = std::chrono::high_resolution_clock::now();
+          std::for_each(ps.begin(), ps.end(), [&ps, ctl_p, cage_width_half](c3p::Particle& p) {
+            if (ctl_p->g_checkbtn)
+              {
+                p << c3p::accumulate(
+                    p, ps.particles(), {ps.g_constant()},
+                    c3p::gravity);  // gravitational forces between particles
+              }
 
-          if (ctl_p->s_checkbtn)
-            {
-              fm.accumulate(c3p::spring, {10, 1});
-            }
+            if (ctl_p->s_checkbtn)
+              {
+                p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
+              }
+
+//          });
+
+
+//          //first, calculate all inter-particle forces
+//          if (ctl_p->g_checkbtn)
+//            {
+//              fm.accumulate(c3p::gravity, {ps.g_constant()});  // gravitational forces between particles
+//            }
+//
+//          if (ctl_p->s_checkbtn)
+//            {
+//              fm.accumulate(c3p::spring, {10, 1});
+//            }
+
+//          auto t2 = std::chrono::high_resolution_clock::now();
+//          auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+//          ++render_passes;
+//          sum_time = sum_time + duration;
+//          std::cout << duration << std::endl;
 
         //apply all external forces
-        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
+//        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
 
           switch(ctl_p->center_dropdown)
           {
@@ -284,39 +310,59 @@ int main(void)
                     break;
             default: break;
           }
-         });
+          
+          //check for collision with cube and calculate reflective force
+          if(ctl_p->cage_checkbtn)
+          {
+            if(p.location.x >= cage_width_half)
+            { 
+              std::cout << ">x" << std::endl;
+              p.velocity = glm::reflect(p.velocity, glm::vec3(-1,0,0));
+              p.acceleration = glm::reflect(p.acceleration, glm::vec3(-1,0,0));
+            }
+
+            else if(p.location.x <= -cage_width_half)
+            {
+              std::cout << "<-x" << std::endl;
+             p.velocity = glm::reflect(p.velocity, glm::vec3(1,0,0));
+             p.acceleration = glm::reflect(p.acceleration, glm::vec3(1,0,0));
+            }
+
+            else if(p.location.y >= cage_width_half)
+            { 
+              std::cout << ">y" << std::endl;
+              p.velocity = glm::reflect(p.velocity, glm::vec3(0,-1,0));
+              p.acceleration = glm::reflect(p.acceleration, glm::vec3(0,-1,0));
+            }
+
+            else if(p.location.y <= -cage_width_half)
+            { 
+              std::cout << "<-y" << std::endl;
+              p.velocity = glm::reflect(p.velocity, glm::vec3(0,1,0));
+              p.acceleration = glm::reflect(p.acceleration, glm::vec3(0,1,0));
+            }
+
+            else if(p.location.z >= cage_width_half)
+            {
+              std::cout << ">-z" << std::endl;
+              p.velocity = glm::reflect(p.velocity, glm::vec3(0,0,1));
+              p.acceleration = glm::reflect(p.acceleration, glm::vec3(0,0,1));
+            }
+
+            else if(p.location.z <= -cage_width_half)
+            {
+              std::cout << "<z" << std::endl;
+              p.velocity = glm::reflect(p.velocity, glm::vec3(0,0,-1));
+              p.acceleration = glm::reflect(p.acceleration, glm::vec3(0,0,-1));
+            }
+          }
+
+           });
 
         //apply force matrix
         ps.particles() << fm;
 
         //      std::transform(ps.begin(), ps.end(), ps.begin(),
-//        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
-//          if (ctl_p->g_checkbtn)
-//            {
-//              p << c3p::accumulate(
-//                  p, ps.particles(), {ps.g_constant()},
-//                  c3p::gravity);  // gravitational forces between particles
-//            }
-//
-//          switch(ctl_p->center_dropdown)
-//          {
-//            case 0: break;
-//            case 1: p << gravity(p, Particle(100.0f), {ps.g_constant()});
-//                    break;
-//            case 2: p << spring(p, Particle(), {10, ctl_p->s_scale});
-//                    break;
-//            case 3: p << simple_attract(p, Particle(10.0), {1});
-//                    break;
-//            default: break;
-//          }
-//
-//          if (ctl_p->s_checkbtn)
-//            {
-//              p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
-//            }
-//
-//          std::cout << p << std::endl;
-//        });
 
 //        Particle np = Particle();
 //        ps.add(std::move(randomize(np)));
@@ -335,7 +381,7 @@ int main(void)
 
       }  // Check if the ESC key was pressed or the window was closed
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-           glfwWindowShouldClose(window) == 0 && !stop);
+           glfwWindowShouldClose(window) == 0);
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();
@@ -343,6 +389,7 @@ int main(void)
 
   ctl_window.join();
   view.join();
+//  std::cout << "average time for nXn: " << (sum_time/render_passes) << std::endl;
   //  gtk_window_close(window);
 
   return 0;

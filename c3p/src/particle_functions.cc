@@ -88,7 +88,6 @@ Force simple_attract(const Particle &p1, const Particle &p2, std::initializer_li
   Force result = calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
         glm::vec3 direction = glm::normalize(p2.location - p1.location);
         float force = (p1.mass * p2.mass)/ pow(glm::length(direction), 2);
-        std::cout << "force: " << force << ", direction: " << direction << std::endl;
         return (force * direction);
       });
   for (auto c : params)
