@@ -126,8 +126,9 @@ void ParticleRenderer::renderCubes()
 }
 
 // calculate color and vertex buffers for each particle and pass them to OpenGL
-void ParticleRenderer::renderPoints()
+void ParticleRenderer::renderPoints(float size)
 {
+  glPointSize(size);
   // for each particle. for now will use
   for (const Particle &p : _particlecontainer)
     {

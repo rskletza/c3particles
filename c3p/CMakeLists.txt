@@ -48,6 +48,8 @@ add_executable(
     src/common/shader.cc
 )
 
+set_property(TARGET main PROPERTY CXX_STANDARD 17)
+
 target_link_libraries(main
   ${GTK_LIBRARIES}
   Threads::Threads

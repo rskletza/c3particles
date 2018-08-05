@@ -211,7 +211,58 @@ void ParticleSystem::update()
 \item specializations of calc\_force, e.g. gravity
 \end{itemize}
 
-The concepts and expressions defined above are incorporated into the system's algorithms. For the calculation of the forces it is helpful to split them logically into "inter-particle forces" and "external forces". The former refers to the forces that exist between all pairs of particles (e.g. gravitational forces) and the latter refers to forces that are applied to each particle independently of all others (e.g. wind).
+The concepts and expressions defined above are incorporated into the system's algorithms. The core algorithm is calc\_force (Listing~\ref{fig:calcforce}), which takes a lamda defining the calculation of a force between two particles. 
+
+\begin{figure}[tb]
+\begin{lstlisting}
+// calculates a force between two particles using the function ff
+// when given the same particle twice, it returns the identity
+Force calc_force(
+    const Particle &p1,
+    const Particle &p2,
+    std::function<Force(const Particle &p1, const Particle &p2)> ff)
+{
+  if (&p1 == &p2)
+    { return glm::vec3(0, 0, 0); }
+  return ff(p1, p2);
+}                                    
+\end{lstlisting}
+ \caption{calc\_force function}
+ \label{fig:calcforce}
+\end{figure}
+
+This enables very straightforward definition of any force between two particles. It can be used to describe forces on the fly, or to create pre-defined force functions, such as gravitational force
+
+\begin{figure}[tb]
+\begin{lstlisting}
+// uses calc_force to calculate gravitational force between two particles
+Force gravity(const Particle &p1,
+			  const Particle &p2,
+              std::initializer_list<float> params)
+{
+  Force result = calc_force(p1,
+  							p2, 
+  						    [p1, p2](const Particle &, const Particle &) {
+        glm::vec3 direction = p2.location - p1.location;
+        float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
+        glm::normalize(direction);
+
+        return (gforce * direction);
+      });
+  // multiply by gravity constant
+  for (auto c : params)
+    {
+      result *= c;
+    }
+  return result;
+}               
+\end{lstlisting}
+ \caption{gravity function}
+ \label{fig:gravity}
+\end{figure}
+
+
+For the calculation of the forces it is helpful to split them logically into "inter-particle forces" and "external forces". The former refers to the forces that exist between all pairs of particles (e.g. gravitational forces) and the latter refers to forces that are applied to each particle independently of all others (e.g. wind).
 
 
 

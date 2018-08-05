@@ -36,7 +36,7 @@ Particle & randomize(Particle & p)
     }
     r = rand(); 
     r /= (float)RAND_MAX;
-    p.mass = r * 10 + 100;
+    p.mass = r * 10 + 50;
     p.size = r;
 
     p.origin = p.location;

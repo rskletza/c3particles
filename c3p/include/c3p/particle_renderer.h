@@ -34,7 +34,7 @@ class ParticleRenderer
 
   /// Calculate color and vertex buffers for each particle and pass them to
   /// OpenGL
-  void renderPoints();
+  void renderPoints(float);
   void renderCubes();
 
  private:
