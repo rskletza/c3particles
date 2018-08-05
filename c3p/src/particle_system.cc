@@ -48,8 +48,8 @@ void ParticleSystem::reset()
   for (Particle &p : _particles)
     {
       p.location = p.origin;
-      p.velocity *= 0;
-      p.acceleration *= 0;
+      p.velocity = glm::vec3(0,0,0);
+      p.acceleration = glm::vec3(0,0,0);
 //      p.velocity = glm::normalize(
 //                       glm::cross(glm::vec3{p.location[0],
 //                       p.location[1], 0.0},
@@ -62,6 +62,16 @@ void ParticleSystem::add(Particle && p)
 {
   _particles.push_back(p);
 }
+
+void ParticleSystem::remove(Particle & p)
+{
+  _particles.erase(std::find(_particles.begin(), _particles.end(), p));
+}
+
+//void Particle::remove(size_t n)
+//{
+//  _particles.erase(_particles.back())
+//}
 
 void ParticleSystem::reverse()
 {
@@ -104,6 +114,11 @@ ParticleContainer::iterator ParticleSystem::begin() { return _particles.begin();
 
 ParticleContainer::iterator ParticleSystem::end() { return _particles.end(); }
 
+ParticleContainer &ParticleSystem::particles()
+{
+  return _particles;
+}
+
 const ParticleContainer &ParticleSystem::particles() const
 {
   return _particles;
@@ -115,6 +130,7 @@ std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps)
     {
       os << p;
     }
+  return os;
 }
 
 size_t ParticleSystem::size() const { return _particles.size(); }

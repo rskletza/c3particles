@@ -23,6 +23,15 @@ Particle &operator<<(Particle &lhs, Force &&force)
   return lhs;
 }
 
+ParticleContainer &operator<<(ParticleContainer &lhs, ForceMatrix & rhs)
+{
+  for(size_t y = 0; y<lhs.size(); ++y)
+  {
+    lhs[y] << accumulate(rhs[y]); //rhs[y] returns a vector of all forces for particle lhs[b]
+  }
+  return lhs;
+}
+
 // calculates a force between two particles using the function ff
 // when given the same particle twice, it returns the identity
 Force calc_force(
@@ -123,7 +132,7 @@ Force accumulate(const Particle &p, const ParticleContainer &ps,
   return result;
 }
 
-Force accumulate(std::initializer_list<Force> forces)
+Force accumulate(std::vector<Force> forces)
 {
   return std::accumulate(forces.begin(), forces.end(),
                          glm::vec3{0.0f, 0.0f, 0.0f},
@@ -132,7 +141,4 @@ Force accumulate(std::initializer_list<Force> forces)
                          });  // TODO try plus, and reduce (C++ 17)
 }
 
-// use a force matrix to avoid calculating each force twice (see ForceMatrix for
-// more info on how this is done)
-//  Force accumulate(Particle p, ForceMatrix & fm)
-}
+} //namespace c3p

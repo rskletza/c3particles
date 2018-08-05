@@ -28,7 +28,7 @@
 #include <c3p/particle_functions.h>
 #include <c3p/particle_renderer.h>
 #include <c3p/particle_system.h>
-//#include <c3p/particle_container.h>
+#include <c3p/force_matrix.h>
 
 using namespace c3p;
 
@@ -180,9 +180,11 @@ int main(void)
     glm::mat4 mvp = Projection * View * Model; 
 
     glPointSize(5.0f);
-    c3p::ParticleSystem ps(5);
+    c3p::ParticleSystem ps(2);
     ps.setRandom();
     c3p::ParticleRenderer p_renderer(ps);
+    c3p::ForceMatrix fm(ps);
+    std::cout << fm << std::endl;
 
     do
       {
@@ -255,14 +257,21 @@ int main(void)
 
         if(!ctl_p->pause_btn)
         {
-        //      std::transform(ps.begin(), ps.end(), ps.begin(),
-        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
+
+          //first, calculate all inter-particle forces
           if (ctl_p->g_checkbtn)
             {
-              p << c3p::accumulate(
-                  p, ps.particles(), {ps.g_constant()},
-                  c3p::gravity);  // gravitational forces between particles
+              fm.accumulate(c3p::gravity, {ps.g_constant()});  // gravitational forces between particles
+              std::cout << fm << std::endl;
             }
+
+          if (ctl_p->s_checkbtn)
+            {
+              fm.accumulate(c3p::spring, {10, 1});
+            }
+
+        //apply all external forces
+        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
 
           switch(ctl_p->center_dropdown)
           {
@@ -271,28 +280,52 @@ int main(void)
                     break;
             case 2: p << spring(p, Particle(), {10, ctl_p->s_scale});
                     break;
-            case 3: p << simple_attract(p, Particle(10.0), {1});
+            case 3: p << simple_attract(p, Particle(10.0), {0.001});
                     break;
             default: break;
           }
+         });
 
-          if (ctl_p->s_checkbtn)
-            {
-              p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
-            }
-          if (std::isnan(p.velocity.x))
-          {
-//            stop = 1;
-            ps.reset();
-            return;
-          }
-          std::cout << p << std::endl;
-        });
+        //apply force matrix
+        ps.particles() << fm;
+
+        //      std::transform(ps.begin(), ps.end(), ps.begin(),
+//        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
+//          if (ctl_p->g_checkbtn)
+//            {
+//              p << c3p::accumulate(
+//                  p, ps.particles(), {ps.g_constant()},
+//                  c3p::gravity);  // gravitational forces between particles
+//            }
+//
+//          switch(ctl_p->center_dropdown)
+//          {
+//            case 0: break;
+//            case 1: p << gravity(p, Particle(100.0f), {ps.g_constant()});
+//                    break;
+//            case 2: p << spring(p, Particle(), {10, ctl_p->s_scale});
+//                    break;
+//            case 3: p << simple_attract(p, Particle(10.0), {1});
+//                    break;
+//            default: break;
+//          }
+//
+//          if (ctl_p->s_checkbtn)
+//            {
+//              p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
+//            }
+//
+//          std::cout << p << std::endl;
+//        });
+
+//        Particle np = Particle();
+//        ps.add(std::move(randomize(np)));
 
         ps.update();
         //have for out here
         //p_renderer.renderPoints();
         }
+        fm.reset();
         p_renderer.renderCubes();
         
         // Swap buffers

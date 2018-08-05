@@ -49,6 +49,8 @@ class ParticleSystem
   /// add a new particle to the system
   void add(Particle &&);
 
+  void remove(Particle &p);
+
   /// calculate the new velocity and location from the acceleration of all the particles 
   void update();
 
@@ -59,6 +61,8 @@ class ParticleSystem
   float g_constant() const;
 
   /// return a reference to the particle container (where all the particles are stored)
+  ParticleContainer &particles();
+
   const ParticleContainer &particles() const;
 
   bool empty() const;

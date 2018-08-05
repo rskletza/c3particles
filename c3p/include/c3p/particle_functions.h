@@ -8,6 +8,7 @@
 
 //#include <c3p/particle_system.h>
 #include <c3p/newtonian_objects.h>
+#include <c3p/force_matrix.h>
 
 namespace c3p
 {
@@ -23,6 +24,9 @@ using ParticleContainer = std::vector<Particle>;
 
 // applies a force to a particle
 Particle &operator<<(Particle &lhs, Force &&rhs);
+
+//applies a force matrix to a particle system (this applies the appropriate force to each particle)
+ParticleContainer &operator<<(ParticleContainer &lhs, ForceMatrix & rhs);
 
 // calculates a force between two particles using the function ff
 // when given the same particle twice, it returns the identity
@@ -56,7 +60,7 @@ Force accumulate(const Particle &p, const ParticleContainer &ps,
                                      std::initializer_list<float>)>
                      ff);
 
-Force accumulate(std::initializer_list<Force> forces);
+Force accumulate(std::vector<Force> forces);
 
 // use a force matrix to avoid calculating each force twice (see ForceMatrix for
 // more info on how this is done)

@@ -49,12 +49,23 @@ Particle & randomize(Particle & p)
   return p;
 }
 
+//template<class InputIt>
+//bool std::find(InputIt first, InputIt last, const Particle & p)
+//{
+//
+//}
+
+bool operator==(const Particle & p, const Particle & other)
+{
+  return (&p == &other || (p.origin == other.origin && p.mass == other.mass));
+}
+
 using Force = glm::vec3;
 
 // inline glm::vec3 force(glm::vec3 f) { return f; }
 
 std::ostream &operator<<(std::ostream &os, const Force &f)
 {
-  os << "(" << f.x << ", " << f.y << ", " << f.z << ")\n";
+  os << "(" << f.x << ", " << f.y << ", " << f.z << ")";
 }
 }
