@@ -19,6 +19,7 @@ using self_t = ParticleSystem;
 ParticleSystem::ParticleSystem(size_t size)
     : _G(10e-4)  // universal gravitational constant (actually 6.67*10^-11)
     , _particles(size)
+    , _requested_size(size)
 { }
 
 ParticleSystem::~ParticleSystem() = default;  // { delete _particles; }
@@ -33,6 +34,7 @@ self_t ParticleSystem::operator=(self_t &&other)
 {
   _particles = other._particles;
   _G = other._G;
+  _requested_size = other._requested_size;
 }
 
 // give each particle a random color and location. the velocity is set
@@ -56,6 +58,23 @@ void ParticleSystem::reset()
 //                                  glm::vec3{0.0, 0.0, 1.0})) *
 //                   0.2f;
     }
+
+  if(_requested_size <=_particles.size())
+  {
+    std::cout << "delete particles" << std::endl;
+    _particles.resize(_requested_size);
+  }
+  else if(_requested_size >= _particles.size())
+  {
+    std::cout << "add particles" << std::endl;
+    while (_requested_size != _particles.size())
+    {
+      auto p = Particle();
+      randomize(p);
+      _particles.push_back(std::move(p));
+    }
+  }
+
 }
 
 void ParticleSystem::add(Particle && p)
@@ -107,6 +126,8 @@ void ParticleSystem::update()
 }
 
 void ParticleSystem::setGexponent(int exp) { _G = 1.0 * std::pow(10, exp); }
+
+void ParticleSystem::requestParticles(size_t size) { _requested_size = size; }
 
 float ParticleSystem::g_constant() const { return _G; }
 

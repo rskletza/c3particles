@@ -20,6 +20,7 @@
 #include <c3p/common/camera.h>
 
 #include <c3p/control_window.h>
+//#include <c3p/glade_window.h>
 #include <c3p/newtonian_objects.h>
 #include <c3p/particle_functions.h>
 #include <c3p/particle_renderer.h>
@@ -70,6 +71,7 @@ int main(void)
 
   ///////////////// start a thread that runs the gui ///////////////////////
   std::thread ctl_window([ctl_p] {
+//      createControlGUI(ctl_p);
     GtkApplication* app;
     int status;
 
@@ -172,6 +174,7 @@ int main(void)
 
         // update gravitational constant
         ps.setGexponent(ctl_p->g_scale);
+        ps.requestParticles((size_t)ctl_p->num_particles);
 
         if(!ctl_p->pause_btn)
         {
@@ -188,7 +191,7 @@ int main(void)
 
             if (ctl_p->s_checkbtn)
               {
-                p << c3p::accumulate(p, ps.particles(), {10, 1}, c3p::spring);
+                p << c3p::accumulate(p, ps.particles(), {(float)ctl_p->sl_scale, (float)ctl_p->s_scale}, c3p::spring);
               }
 
 //          });
@@ -214,16 +217,17 @@ int main(void)
         //apply all external forces
 //        std::for_each(ps.begin(), ps.end(), [&ps, ctl_p](c3p::Particle& p) {
 
-          switch(ctl_p->center_dropdown)
+          if(ctl_p->c_spring_checkbtn)
           {
-            case 0: break;
-            case 1: p << gravity(p, Particle(100.0f), {ps.g_constant()});
-                    break;
-            case 2: p << spring(p, Particle(), {10, ctl_p->s_scale});
-                    break;
-            case 3: p << simple_attract(p, Particle(10.0), {0.001});
-                    break;
-            default: break;
+            p << spring(p, Particle(), {(float)ctl_p->sl_scale, (float)ctl_p->s_scale});
+          }
+          if(ctl_p->c_gravity_checkbtn)
+          {
+            p << gravity(p, Particle(100.0f), {ps.g_constant()});
+          }
+          if(ctl_p->c_attract_checkbtn)
+          {
+            p << simple_attract(p, Particle(10.0), {0.001});
           }
           
           //check for collision with cube and calculate reflective force
@@ -274,11 +278,10 @@ int main(void)
         //      std::transform(ps.begin(), ps.end(), ps.begin(),
 
         ps.update();
-        //have for out here
         }
-        fm.reset();
+
+//        fm.reset();
         p_renderer.renderCubes();
-        //p_renderer.renderPoints(10.0f);
         
         glfwSwapBuffers(window);
         glfwPollEvents();

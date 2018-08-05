@@ -56,6 +56,9 @@ class ParticleSystem
 
   /// change the exponent of the gravitational constant for the particle system
   void setGexponent(int exp);
+  
+  ///request a change in size of the system, fulfilled at next reset
+  void requestParticles(size_t size);
 
   /// read gravitational constant
   float g_constant() const;
@@ -76,6 +79,7 @@ class ParticleSystem
  private:
   ParticleContainer _particles;
   float _G;  // the gravatational constant of the system
+  size_t _requested_size;
 };
 
 }  // namespace c3p
