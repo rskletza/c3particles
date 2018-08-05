@@ -61,12 +61,10 @@ void ParticleSystem::reset()
 
   if(_requested_size <=_particles.size())
   {
-    std::cout << "delete particles" << std::endl;
     _particles.resize(_requested_size);
   }
   else if(_requested_size >= _particles.size())
   {
-    std::cout << "add particles" << std::endl;
     while (_requested_size != _particles.size())
     {
       auto p = Particle();
