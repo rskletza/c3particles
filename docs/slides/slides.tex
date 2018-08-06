@@ -69,7 +69,10 @@
 \frametitle{Zielsetzung}
 - Partikelsystem: Simulation (oft in der 3d Grafik) von chaotischen Systemen und nat\"urlichen Ph\"anomenen \linebreak
 \linebreak
-- Ziel: Entwicklung einer Programmierabstraktion f\"ur Newton'sche Mechanik in Patikelsystemen
+- C++ als Werkzeug: mathematisch Ausdrucksstark, formale Konzepte lassen sich sauber definieren \linebreak
+\linebreak
+- Ziel: Entwicklung einer Programmierabstraktion f\"ur Newton'sche Mechanik in Parntikelsystemen
+
 \end{frame}
 
 \begin{frame}
@@ -107,7 +110,7 @@ Das Superpositionsprinzip: \linebreak
 "Wirken auf ein Objekt mehrere Kräfte, so addieren sich diese vektoriell zu einer resultierenden Kraft auf."
 \linebreak
 \begin{equation}
-\overrightarrow{F_{res}} = \overrightarrow{F_1} + \overrightarrow{F_2} +... \overrightarrow{F_n}
+\overrightarrow{F_{res}} = \overrightarrow{F_1} + \overrightarrow{F_2} +...+ \overrightarrow{F_n}
 \end{equation}
 \end{frame}
 
@@ -115,7 +118,7 @@ Das Superpositionsprinzip: \linebreak
 \frametitle{Modellierung}
 - Modellierung des Partikelsystems basiert stark auf der Physik \linebreak
 \linebreak
-- besteht aus Newton'schen Objekten (Partikel) und Kr\"aften \linebreak
+- besteht aus Newton'schen Objekten (Partikeln) und Kr\"aften \linebreak
 $\rightarrow$ Konzepte \linebreak
 \linebreak
 - die Expressions m\"ussen die Gesetze der Physik erf\"ullen k\"onnen
@@ -210,13 +213,16 @@ Expressions f\"ur "Kraft" \linebreak
 //iterate over all particles in the particle system
 std::for_each(ps.begin(), ps.end(), [&ps](c3p::Particle& p)
 {
-
-  	//gravitational forces between particles
-	p << c3p::accumulate(p,
-						 ps.particles(),
-						 {ps.g_constant()},
-    					 c3p::gravity);
-    					 
+	// simple user-defined attraction force
+	p << calc_force(p, Particle(), [p](const Particle &, const Particle &)
+	{
+    	glm::vec3 direction = glm::normalize(glm::vec3(0,0,0) - p.location());
+		return direction * 0.1;
+    });
+    
+    // spring force from virtual particle at (0,0,0) to each particle
+	p << spring(p, Particle(0,0,0), {spring_constant, spring_length);
+   					 
 	...
 \end{lstlisting}
 \end{frame}
@@ -225,15 +231,12 @@ std::for_each(ps.begin(), ps.end(), [&ps](c3p::Particle& p)
 \frametitle{Implementierung}
 \begin{lstlisting}[caption=Beispiel von Berechnung und Anwendung von Kr\"aften]
 	...
-	// spring force from virtual particle at (0,0,0) to each particle
-	p << spring(p, Particle(0,0,0), {spring_constant, spring_length);
 
-	// simple user-defined attraction force pulling towards (0,0,0)
-	p << calc_force(p, Particle(), [p](const Particle &, const Particle &)
-	{
-    	glm::vec3 direction = glm::normalize(glm::vec3(0,0,0) - p.location());
-		return direction * 0.1;
-    });
+    //gravitational forces between particles
+	p << c3p::accumulate(p,
+						 ps.particles(),
+						 {ps.g_constant()},
+    					 c3p::gravity);
 }          
    
 \end{lstlisting}
@@ -285,6 +288,7 @@ void update(Particle &p)
 %\color{black}\rule{\linewidth}{4pt}
 Physik $\rightarrow$ \linebreak
 \linebreak
+\linebreak
 
 \tiny$\overrightarrow{s}(t) = \frac{\overrightarrow{a}*t^2}{2} + C_v + C_s$
 \linebreak
@@ -292,9 +296,11 @@ Physik $\rightarrow$ \linebreak
 \linebreak
 \linebreak
 \tiny$F= m*a$
-
-
-
+\linebreak
+\linebreak
+\linebreak
+\linebreak
+\tiny$\overrightarrow{F_{res}} = \overrightarrow{F_1} + \overrightarrow{F_2} +... \overrightarrow{F_n}$
 
 \end{column}%
 \hfill%
@@ -303,6 +309,20 @@ Physik $\rightarrow$ \linebreak
 
 Konzepte $\rightarrow$ \linebreak
 \linebreak
+
+\tiny"Newton'sches Objekt" \linebreak
+\linebreak
+"$NO << Kraft$" \linebreak
+\linebreak
+"update(NO)"\linebreak
+\linebreak
+\linebreak
+
+"Kraft" \linebreak
+\linebreak
+"calc\_force(NO, NO, ff)" \linebreak
+\linebreak
+"accumulate(f1, f2, ..)"
 \end{column}%
 \begin{column}{.33\textwidth}
 %\color{black}\rule{\linewidth}{4pt}
