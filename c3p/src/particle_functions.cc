@@ -23,12 +23,13 @@ Particle &operator<<(Particle &lhs, Force &&force)
   return lhs;
 }
 
-ParticleContainer &operator<<(ParticleContainer &lhs, ForceMatrix & rhs)
+ParticleContainer &operator<<(ParticleContainer &lhs, ForceMatrix &rhs)
 {
-  for(size_t y = 0; y<lhs.size(); ++y)
-  {
-    lhs[y] << accumulate(rhs[y]); //rhs[y] returns a vector of all forces for particle lhs[b]
-  }
+  for (size_t y = 0; y < lhs.size(); ++y)
+    {
+      lhs[y] << accumulate(
+          rhs[y]);  // rhs[y] returns a vector of all forces for particle lhs[b]
+    }
   return lhs;
 }
 
@@ -80,14 +81,16 @@ Force spring(const Particle &p1, const Particle &p2,
 
         return direction * magnitude;
       });
-      return result;
+  return result;
 }
 
-Force simple_attract(const Particle &p1, const Particle &p2, std::initializer_list<float> params)
+Force simple_attract(const Particle &p1, const Particle &p2,
+                     std::initializer_list<float> params)
 {
-  Force result = calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
+  Force result =
+      calc_force(p1, p2, [p1, p2](const Particle &, const Particle &) {
         glm::vec3 direction = glm::normalize(p2.location - p1.location);
-        float force = (p1.mass * p2.mass)/ pow(glm::length(direction), 2);
+        float force = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
         return (force * direction);
       });
   for (auto c : params)
@@ -140,4 +143,24 @@ Force accumulate(std::vector<Force> forces)
                          });  // TODO try plus, and reduce (C++ 17)
 }
 
-} //namespace c3p
+void update(Particle &p)
+{
+  // deltaT will be 1 because calculation is based on frames
+  // v(t)= Int(acc) = acc*t + C
+  // C is the integration constant, which is the velocity at the previous
+  // point in time
+  //--> v(t) = a*t + v(t-1)
+  // t in this case is equal to 1
+  // as a result, the velocity v(t) = acc*1 + v(t-1)
+  p.velocity += p.acceleration * 1.0f;  // deltaT = 1.0
+
+  // s(t) = Int(velocity) = Int(acc*t + C) = (a*t^2)/2 + C*t + C1
+  // C1 is the location at the previous point in time
+  //--> s(t) = (a*t^2)/2 + v(t) + s(t-1)
+  // again, t is equal to 1
+  p.location += (p.acceleration * 1.0f) / 2.0f + p.velocity;  // deltaT^2 = 1.0
+
+  p.acceleration = {0, 0, 0};  // acceleration is recalculated every time
+}
+
+}  // namespace c3p

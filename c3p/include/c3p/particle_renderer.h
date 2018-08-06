@@ -5,8 +5,8 @@
 
 #include <glm/glm.hpp>
 
-#include <c3p/particle_system.h>
 #include <c3p/newtonian_objects.h>
+#include <c3p/particle_system.h>
 
 // first, bind renderer to system
 // auto pr = ParticleRenderer(particlesystem);

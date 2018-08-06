@@ -1,0 +1,14 @@
+\frametitle{Implementierung}
+\begin{lstlisting}[caption=Update Funktion]
+void update(Particle &p)
+{
+	//v(t) = a*t + v(t-1)
+	p.velocity = p.acceleration * 1.0f + p.velocity; //deltaT = 1.0
+
+	//s(t) = (a*t^2)/2 + v(t) + s(t-1)
+	p.location = (p.acceleration * 1.0f) / 2.0f + p.velocity + p.location;
+
+	//acceleration is not accumulative, but recalculated at each time step
+	p.acceleration = {0, 0, 0};
+}
+\end{lstlisting}

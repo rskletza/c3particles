@@ -13,9 +13,6 @@ namespace c3p
 class ParticleRenderer;
 class ParticleSystem;
 
-// Apply a force to a particle object
-// void applyForce(glm::vec3 force, Particle &p);
-
 std::ostream &operator<<(std::ostream &os, const ParticleSystem &ps);
 
 class ParticleSystem
@@ -24,7 +21,7 @@ class ParticleSystem
   using vec = glm::vec3;  // std::array<float, 3>;
   using self_t = ParticleSystem;
 
-  friend ParticleRenderer;  // TODO find something better than friend
+  friend ParticleRenderer;
 
  public:
   ParticleSystem() = delete;
@@ -45,25 +42,23 @@ class ParticleSystem
 
   /// invert the velocity vector of each particle (basically reverse in time)
   void reverse();
-  
-  /// add a new particle to the system
-  void add(Particle &&);
 
-  void remove(Particle &p);
-
-  /// calculate the new velocity and location from the acceleration of all the particles 
-  void update();
+//  /// add a new particle to the system
+//  void add(Particle &&);
+//
+//  void remove(Particle &p);
 
   /// change the exponent of the gravitational constant for the particle system
   void setGexponent(int exp);
-  
-  ///request a change in size of the system, fulfilled at next reset
+
+  /// request a change in size of the system, fulfilled at next reset
   void requestParticles(size_t size);
 
   /// read gravitational constant
   float g_constant() const;
 
-  /// return a reference to the particle container (where all the particles are stored)
+  /// return a reference to the particle container (where all the particles are
+  /// stored)
   ParticleContainer &particles();
 
   const ParticleContainer &particles() const;

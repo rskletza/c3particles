@@ -61,12 +61,6 @@ Ludwig-Maximilians-Universit\"at M\"unchen\\
 \maketitle
 
 
-%\begin{abstract}
-%
-%
-%%keywords{network operating systems, programmable networks, Software-Defined Networking, SDN-controllers}
-%\end{abstract}
-
 \section{Introduction}
 Particle systems are used in many different areas: most prominently in the entertainment industry in games and movies and for simulations and visualizations scientific research. No matter the area of application, the basic rules governing these systems are the same: the laws of physics. c3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
 
@@ -120,55 +114,43 @@ f(x + y) = f(x) + f(y)
 These laws serve as the foundations of the physical model of the particle system. 
 
 \section{Modeling the Particle System}
-The basic concepts needed in order to model the particle system are already given by the physics described in the previous section. In fact, a particle system is a fairly simple construct. It contains objects, its "particles", which behave according to newtonian physics, i.e. "newtonian objects". They have a location, velocity, acceleration and mass. As Newton's First Law states, a force needs to be exerted in order for a particle to move. Since movement is merely a change of location over time, time also needs to be considered.
+The basic concepts needed in order to model the particle system are already given by the physics described in the previous section. In fact, a particle system is a fairly simple construct. It contains objects, which behave according to newtonian physics, i.e. "Newtonian Objects". They have a location, velocity, acceleration and mass. As Newton's First Law states, a force needs to be exerted in order for a particle to move. "Force" is therefore the other basic concept.
+The concepts "Newtonian Object" (NO) and "Force" are already sufficient for modeling the system, so their expressions must cover all of the basic laws of physics discussed above.
 
-\subsection{Concepts}
-In fact, these two concepts, "newtonian object" and "force" are sufficient for modeling a particle system. The basic .. expressions ..:
+\subsection{Newtonian Object}
 
-\paragraph{Particle $\ll$ Force}
-applies a force to a particle using the formulas \ref{eq:vel} and \ref{eq:loc}
+\subsubsection{$F = m*a$}
+The expression that represents this law is "apply\_force", or "$<<$" and it applies a force to an NO by dividing the force by the NO's mass and adding that to the NO's current acceleration
 
-\paragraph{Force calc\_force(Particle, Particle, Function)}
-calculates a force between two particles using the supplied function, when given the same particle twice, it returns the additive identity
+\subsubsection{Integrating the acceleration}
+Using the formulas \ref{eq:vel} and \ref{eq:loc}, the expression "update" calculates an NO's location and velocity from its acceleration
 
-\paragraph{Force gravity(Particle, Particle, List params)}
-a specialization of calc\_force for calculating the gravitational force between two particles (is not actually a concept, but shows what calc\_force is capable of)
+\subsection{Force}
 
-\paragraph{Force accumulate(Particle, ParticleContainer, Function)}
-calc\_force for p with each other p in the container and reduce (addition) to one force
+\subsubsection{Force Origins}
+Forces are defined by the laws of nature, e.g. gravitational forces. The expression "calc\_force" calculates the force between two NO's according to a given force function
 
-\paragraph{Force accumulate(Particle, ParticleContainer, List params, Function)}
-use a pre-defined function to calculate the forces, pass initializer list for parameters
+\subsubsection{Superposition Principle}
+The expression "accumulate" sums up a set of forces according to the superposition principle.
 
-paragraph{Force accumulate(List forces)}
-sum up a set of forces
 
-\subsection{Time}
-As the particle system is made to be rendered on a screen in (semi) real time, the frame per second count gives discrete time steps that are used for integrating over acceleration. For each frame, one time step is calculated, which simplifies the result of formula~\ref{eq:loc}:
-
-\begin{equation}
-\frac{\overrightarrow{a}*t^2}{2} + C_v + C_s = \frac{\overrightarrow{a}}{2} +C_v + C_s
-\label{eq:simpleloc}
-\end{equation}
+%\subsection{Time}
+%As the particle system is made to be rendered on a screen in (semi) real time, the frame per second count gives discrete time steps that are used for integrating over acceleration. For each frame, one time step is calculated, which simplifies the result of formula~\ref{eq:loc}:
+%\begin{equation}
+%\frac{\overrightarrow{a}*t^2}{2} + C_v + C_s = \frac{\overrightarrow{a}}{2} +C_v + C_s
+%\label{eq:simpleloc}
+%\end{equation}
 
 %examples why it is cool: reverse, 
 
 \section{Implementation}
 
-c3particles contains several separate modules (Figure~\ref{fig:sysdia}. The Particle System module contains the physical model and uses input given by the user to select forces. It updates the particles that are then read by the Particle Renderer, which uses the location to calculate the vertices and faces that need to be drawn. It passes the vertex buffers of all the particles to the OpenGL Rendering Pipeline, which processes them accordingly. It then writes the framebuffer to the screen and triggers a new calculation.
-
-%\begin{itemize}
-%\item system diagram
-
-%\item for each time step (signaled by OpenGL), the Particle System module calculates the new values for all the particles based on the input given by the user control window. These values are then read by the Particle Renderer and used to fill the vertex buffers depending on the visualization selected (e.g as points or cubes)
-%\item then, the OpenGL Rendering Pipeline renders the frame, using the provided shaders
-%\item as soon as the screenbuffer is swapped, the calculation for the next frame is started
-%\end{itemize}
+c3particles contains several separate modules (Figure~\ref{fig:sysdia}). The Particle System module contains the physical model and uses input given by the user to select forces. It updates the particles that are then read by the Particle Renderer, which uses the location to calculate the vertices and faces that need to be drawn. It passes the vertex buffers of all the particles to the OpenGL Rendering Pipeline, which processes them accordingly. It then writes the framebuffer to the screen and triggers a new calculation.
 
 \textbf{
 \begin{figure}[]
 \centering
-\includegraphics[width=0.8\textwidth]{images/system-diagram.pdf}
+\includegraphics[width=0.8\textwidth]{images/system-diagram-no-shaders.pdf}
 \caption{c3particles system diagram}
 \label{fig:sysdia}
 \end{figure}
@@ -176,7 +158,8 @@ c3particles contains several separate modules (Figure~\ref{fig:sysdia}. The Part
 
 \subsection{Particle System}
 The Particle System module contains the physical model of the particle system and the particle objects (Figure~\ref{fig:sysdiadetail})
-The physical model includes algorithms for calculating the forces on the particles, and the particles themselves. For each frame, the old values of the particles are read and used to update to the new values. The functions used to update the values are taken directly from formulas~\ref{eq:vel} and \ref{eq:simpleloc}.
+
+The physical model includes algorithms for calculating the forces on the particles, and the particles themselves. For each frame, the old values of the particles are read and used to update to the new values. This is where the previously defined expressions are relevant.
 
 \textbf{
 \begin{figure}[]
@@ -187,94 +170,47 @@ The physical model includes algorithms for calculating the forces on the particl
 \end{figure}
 }
 
-\begin{figure}[tb]
-\begin{lstlisting}
-void ParticleSystem::update()                                                              
-{                                                                                          
-  // deltaT will always be 1.0 because calculation is based on frames                               
-  for (Particle &p : _particles)                                                           
-    {                                                                                      
-      //v(t) = a*t + v(t-1)                                                            
-      p.velocity = p.acceleration * 1.0f + p.velocity; //deltaT = 1.0                                  
-                                                                                           
-      //s(t) = (a*t^2)/2 + v(t) + s(t-1)                                               
-      p.location = (p.acceleration * 1.0f) / 2.0f
-      			   + p.velocity + p.location;
-                                       	
-      //acceleration is not accumulative, but recalculated at each time step          
-      p.acceleration = {0, 0, 0};
-    }                                                                                      
-}                                                            
-\end{lstlisting}
- \caption{ParticleSystem::update()}
- \label{fig:update}
-\end{figure}
-
 \subsubsection{Algorithms}
-\begin{itemize}
-\item concepts and expressions come to fruition here
-\item differentiation between "external" forces and inter-particle forces
-\item apply force $"<<"$
-\item calc\_force
-\item accumulate
-\item specializations of calc\_force, e.g. gravity
-\end{itemize}
 
-The concepts and expressions defined above are incorporated into the system's algorithms. The core algorithm is calc\_force (Listing~\ref{fig:calcforce}), which takes a lamda defining the calculation of a force between two particles. 
+First, selected force functions are computed for each particle in the system. These functions are all based on calc\_force~\ref{fig:calcforce} which calculates the force between two particles based on a lambda function. 
 
-\begin{figure}[tb]
-\begin{lstlisting}
+\begin{lstlisting}[caption=calc\_force function]
 // calculates a force between two particles using the function ff
-// when given the same particle twice, it returns the identity
+// when given the same particle twice, it returns the additive identity
 Force calc_force(
     const Particle &p1,
     const Particle &p2,
     std::function<Force(const Particle &p1, const Particle &p2)> ff)
 {
   if (&p1 == &p2)
-    { return glm::vec3(0, 0, 0); }
+    { return Force(0, 0, 0); }
   return ff(p1, p2);
 }                                    
 \end{lstlisting}
- \caption{calc\_force function}
  \label{fig:calcforce}
-\end{figure}
 
 This enables very straightforward definition of any force between two particles. It can be used to describe forces on the fly, or to create pre-defined force functions, such as gravitational force (Listing~\ref{fig:gravity}).
 
-\begin{figure}[tb]
-\begin{lstlisting}
+\begin{lstlisting}[caption=gravity function]
 // uses calc_force to calculate gravitational force between two particles
-Force gravity(const Particle &p1,
-			  const Particle &p2,
-              std::initializer_list<float> params)
+Force gravity(const Particle &p1, const Particle &p2, float g_constant)
 {
-  Force result = calc_force(p1,
-  							p2, 
-  						    [p1, p2](const Particle &, const Particle &) {
-        glm::vec3 direction = p2.location - p1.location;
-        float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
-        glm::normalize(direction);
+  Force result = calc_force(p1, p2, 
+						[p1, p2](const Particle &, const Particle &) {
+	glm::vec3 direction = p2.location - p1.location;
+	float gforce = (p1.mass * p2.mass) / pow(glm::length(direction), 2);
+	glm::normalize(direction);
 
-        return (gforce * direction);
-      });
-  // multiply by gravity constant
-  for (auto c : params)
-    {
-      result *= c;
-    }
-  return result;
+	return g_constant * (gforce * direction);
+  });
 }               
 \end{lstlisting}
- \caption{gravity function}
  \label{fig:gravity}
-\end{figure}
 
 
-For the calculation of the forces it is helpful to split them logically into "inter-particle forces" and "external forces". The former refers to the forces that exist between all pairs of particles (e.g. gravitational forces) and the latter refers to forces that are applied to each particle independently of all others (e.g. wind). 
+For the calculation of the forces it is helpful to split them logically into "inter-particle forces" and "external forces". The former refers to the forces that exist between all pairs of particles (e.g. gravitational forces) and the latter refers to forces that are applied to each particle independently of all others (e.g. wind). This is the reason for the differentiation between forces that are applied directly (e.g. "spring" in Figure~\ref{fig:sysdiadetail}) and forces that are accumulated first (e.g. "gravity in Figure~\ref{fig:sysdiadetail}). Listing~\ref{fig:main} shows an example for the application of different forces on the particles of a particle system.
 
-\begin{figure}[tb]
-\begin{lstlisting}
+\begin{lstlisting}[caption=example of how forces are calculated and applied]
 //iterate over all particles in the particle system
 std::for_each(ps.begin(), ps.end(), [&ps](c3p::Particle& p)
 {
@@ -295,48 +231,57 @@ std::for_each(ps.begin(), ps.end(), [&ps](c3p::Particle& p)
 		return direction * 0.1;
     });
 }          
-
-//calculate new location from acceleration
-ps.update();     
+   
 \end{lstlisting}
- \caption{example of how forces are applied}
  \label{fig:main}
-\end{figure}
 
-\emph{c3p::accumulate} (Listing~\ref{fig:main}, line 6) calculates the forces between each pair of particles (i.e. inter-particle forces) and reduces them. The result is a force that can then be applied normally.
+\emph{c3p::accumulate} (Listing~\ref{fig:main}, line 6) calculates the forces between each pair of particles (i.e. inter-particle forces) and reduces them. The result is a force that can then be applied directly.
 
+The next step is updating all the particles with the update function (Listing~\ref{fig:update}). The calculation for the current time step is then finished and control is passed to the Particle Renderer.
 
-\subsubsection{Particle Container}
-The particles need to be stored in some data structure. At the moment, this is a std::vector which provides all the needed operations.
+\begin{lstlisting}[caption=update function]
+void update(Particle &p)
+{
+	//v(t) = a*t + v(t-1)                                                            
+	p.velocity = p.acceleration * 1.0f + p.velocity; //deltaT = 1.0                                  
+                                                                                           
+	//s(t) = (a*t^2)/2 + v(t) + s(t-1)                                               
+	p.location = (p.acceleration * 1.0f) / 2.0f + p.velocity + p.location;
+                                       	
+	//acceleration is not accumulative, but recalculated at each time step          
+	p.acceleration = {0, 0, 0};
+}                                                            
+\end{lstlisting}
+\label{fig:update}
 
 \subsection{User Control Window}
 The user controls are implemented with GTK+\cite{gtk}. The control window runs in a different thread that fills a C struct with the values set by the user. These values are then read by the system in order to calculate the desired forces.
 
 \subsection{Particle Renderer}
 The particle renderer iterates over the particles in the particle system and fills the vertex buffers for each one. How the vertex buffers are filled depends on the function called. At the moment, it is possible to render the particles as pixels with no depth perception and uniform size (\emph{c3p::ParticleRenderer::renderPoints}
-or as cubes (\emph{c3p::ParticleRenderer::renderCubes}). The size of the cubes depends on the size of the particle (which, at the moment is dependent on its mass). The vertex buffers are then passed to the OpenGL Rendering Pipeline.
+or as cubes (\emph{c3p::ParticleRenderer::renderCubes}). The size of the cubes is proportional to the mass of the particle. The vertex buffers are then passed to the OpenGL Rendering Pipeline.
 
-\subsection{Shaders}
+%\subsection{Shaders}
 
 \subsection{Graphics Engine}
 The graphics engine is only secondary for this project. OpenGL\cite{opengl} was chosen because of its prominence, however, with an appropriate particle renderer, any one could be used.
 
-\section{Assets of c3particles}
-\begin{itemize}
-\item mathematical functions can be easily applied
-\item clean separation allows for easy access to velocity etc (for reflection, reverse)
-\end{itemize}
-
 \section{Complexity and Possible Optimizations}
-\begin{itemize}
-\item complexity of naive implementation of inter-particle forces is $O(n^2)$
-\item complexity of application of external forces and also updating is O(n)
-\item force matrix for inter-particle forces
-\item parallelize particle calculation (works very well, because applyforce only updates acceleration, so location and velocity are unchanged until all forces have been calculated)
-\item well suited for offloading to the GPU
-\item binary space partitioning for forces that are inversely proportional to distance
-\item no pruning because particles that are outside of the viewport still exert forces 
-\end{itemize}
+The implementation of a particle system has a few areas that inherently have a high time complexity. For example, the complexity of a naive implementation of inter-particle forces is $O(2n^2)$, where every force is calculated twice.
+
+Furthermore, applying a force, updating, and rendering each particle requires $O(3n)$. For systems with a large number of particles, this quickly exceeds the capacities of regular CPU hardware. In order to mitigate this load, there are several possible approaches.
+
+The first and easiest solution would be to parallelize the iterations over the particles. Since applying forces to particles does not change the location and velocity (which would need to be read by other threads), parallelization is no problem at all. The same applies for the update loop.
+
+These functions are also well-suited to be offloaded to the GPU.
+
+The inter-particle NxN forces provide somewhat more of a challenge. A possible solution could be to construct a partitioned semi-symmetric force matrix (the lower half is the inverse of the upper half) and fill two fields after one calculation. Binary space partitioning could also be useful for forces that have a strong distance decay (such as gravity).
+
+
+\section{Significance of the c3particles Programming Abstraction}
+
+The programming abstraction offered by c3particles allows for a very formal definition of physical forces to be applied to the system. This, along with the clean separation from the underlying rendering pipeline makes implementing new forces very uncomplicated and elegant. 
+
 
 
 \bibliography{literature}

@@ -23,10 +23,10 @@ std::ostream &operator<<(std::ostream &os, const Particle &p)
   return os;
 }
 
-Particle & randomize(Particle & p)
+Particle &randomize(Particle &p)
 {
-//  std::srand(std::time(nullptr));
-  float r; 
+  //  std::srand(std::time(nullptr));
+  float r;
   for (int i = 0; i < 3; ++i)
     {
       r = rand();
@@ -34,28 +34,28 @@ Particle & randomize(Particle & p)
       p.color[i] = r;
       p.location[i] = r * 60 - 30;
     }
-    r = rand(); 
-    r /= (float)RAND_MAX;
-    p.mass = r * 10 + 50;
-    p.size = r;
+  r = rand();
+  r /= (float)RAND_MAX;
+  p.mass = r * 10 + 50;
+  p.size = r;
 
-    p.origin = p.location;
-    p.velocity = glm::normalize(
-                     glm::cross(glm::vec3{p.location[0],
-                     p.location[1], 0.0},
-                                glm::vec3{0,0,1})) * 0.2f;
+  p.origin = p.location;
+  p.velocity =
+      glm::normalize(glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
+                                glm::vec3{0, 0, 1})) *
+      0.2f;
   //          p.velocity = glm::normalize(glm::vec3{p.location[0],
   //          p.location[1], 0.0}) * -1.0f;
   return p;
 }
 
-//template<class InputIt>
-//bool std::find(InputIt first, InputIt last, const Particle & p)
+// template<class InputIt>
+// bool std::find(InputIt first, InputIt last, const Particle & p)
 //{
 //
 //}
 
-bool operator==(const Particle & p, const Particle & other)
+bool operator==(const Particle &p, const Particle &other)
 {
   return (&p == &other || (p.origin == other.origin && p.mass == other.mass));
 }

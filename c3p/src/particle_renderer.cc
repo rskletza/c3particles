@@ -28,21 +28,20 @@ void ParticleRenderer::renderCubes()
       GLuint vertexbuffer;
       GLuint elementbuffer;
 
-      float w = p.size/2.0f;
+      float w = p.size / 2.0f;
       glm::vec3 pos = p.location;
-      GLfloat vertex_buffer_data[] =
-      {
-        // front
-        (pos.x - w), (pos.y - w), (pos.z + w), //bottom left 0
-        (pos.x + w), (pos.y - w), (pos.z + w), //bottom right 1
-        (pos.x + w), (pos.y + w), (pos.z + w), //top left 2
-        (pos.x - w), (pos.y + w), (pos.z + w), //top right 3
+      GLfloat vertex_buffer_data[] = {
+          // front
+          (pos.x - w), (pos.y - w), (pos.z + w),  // bottom left 0
+          (pos.x + w), (pos.y - w), (pos.z + w),  // bottom right 1
+          (pos.x + w), (pos.y + w), (pos.z + w),  // top left 2
+          (pos.x - w), (pos.y + w), (pos.z + w),  // top right 3
 
-        // back
-        (pos.x - w), (pos.y - w), (pos.z - w), //bottom left 4
-        (pos.x + w), (pos.y - w), (pos.z - w), //bottom right 5
-        (pos.x + w), (pos.y + w), (pos.z - w), //top left 6
-        (pos.x - w), (pos.y + w), (pos.z - w), //top right 7
+          // back
+          (pos.x - w), (pos.y - w), (pos.z - w),  // bottom left 4
+          (pos.x + w), (pos.y - w), (pos.z - w),  // bottom right 5
+          (pos.x + w), (pos.y + w), (pos.z - w),  // top left 6
+          (pos.x - w), (pos.y + w), (pos.z - w),  // top right 7
       };
       glGenBuffers(1, &vertexbuffer);
       glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -51,41 +50,35 @@ void ParticleRenderer::renderCubes()
 
       glm::vec3 color = p.color;
       GLfloat color_buffer_data[24];
-      for (int i = 0; i<24; i+=3)
-      {
-        color_buffer_data[i] = color[0];
-        color_buffer_data[i+1] = color[1];
-        color_buffer_data[i+2] = color[2];
-      }
+      for (int i = 0; i < 24; i += 3)
+        {
+          color_buffer_data[i] = color[0];
+          color_buffer_data[i + 1] = color[1];
+          color_buffer_data[i + 2] = color[2];
+        }
       glGenBuffers(1, &colorbuffer);
       glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
       glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data),
                    color_buffer_data, GL_STATIC_DRAW);
 
-      GLuint cube_elements[] =
-      {
-        // front
-        0, 1, 2,
-        2, 3, 0,
-        // right
-        1, 5, 6,
-        6, 2, 1,
-        // back
-        7, 6, 5,
-        5, 4, 7,
-        // left
-        4, 0, 3,
-        3, 7, 4,
-        // bottom
-        4, 5, 1,
-        1, 0, 4,
-        // top
-        3, 2, 6,
-        6, 7, 3, 
+      GLuint cube_elements[] = {
+          // front
+          0, 1, 2, 2, 3, 0,
+          // right
+          1, 5, 6, 6, 2, 1,
+          // back
+          7, 6, 5, 5, 4, 7,
+          // left
+          4, 0, 3, 3, 7, 4,
+          // bottom
+          4, 5, 1, 1, 0, 4,
+          // top
+          3, 2, 6, 6, 7, 3,
       };
       glGenBuffers(1, &elementbuffer);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements), cube_elements, GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_elements),
+                   cube_elements, GL_STATIC_DRAW);
 
       glEnableVertexAttribArray(0);
       glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -110,11 +103,11 @@ void ParticleRenderer::renderCubes()
           (void *)0  // array buffer offset
           );
 
-      //Push each element in buffer_vertices to the vertex shader
+      // Push each element in buffer_vertices to the vertex shader
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
       int size;
       glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-      glDrawElements(GL_TRIANGLES, size/sizeof(GLuint), GL_UNSIGNED_INT, 0);
+      glDrawElements(GL_TRIANGLES, size / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
       glDisableVertexAttribArray(0);
       glDisableVertexAttribArray(1);
