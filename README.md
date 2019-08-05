@@ -1,49 +1,28 @@
-# c3particles
+# c3particles: Modeling a Particle System in C++
 
-A C++ interface for rendering particle systems.
+c3particles is an implementation of a particle system model in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
 
-## Abstract
+## Summary
 
-Particle systems are used in many different areas, ..animation, simulation, research, ... . No matter the area of application, the basic rules governing these systems are the same: the laws of physics. C3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles.
+Particle systems are used in many different areas: most prominently in the entertainment industry in games and movies and for simulations and visualizations scientific research. No matter the area of application, the basic rules governing these systems are the same: the laws of physics. c3particles (cpp particles) implements a model of a particle system in C++ that separates the physical concepts and laws from the underlying graphics library. This enables a mathematical formulation of the forces influencing the particles. C++ is an optimal tool for this task, as it is a very mathematically expressive programming language that can be used to cleanly define formal concepts.
 
-<!-- [![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
+## System Diagram
+![system diagram](https://github.com/rskletza/c3particles/blob/master/docs/images/complete-diagram.png)
 
-    One to two paragraph statement about your product and what it does. Motivation
-
-![](header.png) -->
-
-## System diagram
+## Requirements
+C++14, OpenGL, GTK+3, CMake v3
 
 ## Installation
-
-### Required
-
-OpenGL (version?), glew-utils, libglew-dev, libglm-dev, libglfw3-dev, libglm-dev
-
-<!-- OS X & Linux:
-
-```sh
-shell stuff
-``` -->
-
-## Usage example
-
-
-## Development setup
-
-<!-- Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
-
--->
-
-## Release History
-
-
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki
+In the c3particles directory:
+```BASH
+mkdir build;
+cd build;
+cmake;
+make;
+```
+## Execution
+In the build/c3p directory:
+```BASH
+./main
+```
 
