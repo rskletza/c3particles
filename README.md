@@ -17,10 +17,15 @@ In the c3particles directory:
 ```BASH
 mkdir build;
 cd build;
-cmake;
+cmake ..;
 make;
 ```
 ## Execution
+The execution file needs to be in the same parent directory as the shaders, so copy the shaders to the build directory:
+In the build directory:
+```BASH
+cp c3p/src/shaders ./
+```
 In the build/c3p directory:
 ```BASH
 ./main
