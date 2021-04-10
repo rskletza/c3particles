@@ -24,7 +24,7 @@ make;
 The execution file needs to be in the same parent directory as the shaders, so copy the shaders to the build directory:
 In the build directory:
 ```BASH
-cp c3p/src/shaders ./
+cp -r c3p/src/shaders ./
 ```
 In the build/c3p directory:
 ```BASH
