@@ -11,7 +11,7 @@ namespace c3p
 // gravitation)
 struct Particle
 {
-  glm::vec3 color;  // TODO: does this belong here?
+  glm::vec3 color;
   glm::vec3 origin;
   glm::vec3 location;
   glm::vec3 velocity;

@@ -102,23 +102,23 @@ int main(void)
     //////////////// initialize particle system /////////////////////////
 
     c3p::ParticleSystem ps(100);
-    ps.setRandom();
+    ps.setStartConfiguration();
     c3p::ParticleRenderer p_renderer(ps);
-    c3p::ForceMatrix fm(ps);
+//    c3p::ForceMatrix fm(ps); //force matrix not active
     float cage_width_half =
         30;  // contain the particles in a cage with side length 200
 
+    /////////////// execution loop ////////////////
     do
       {
-        // TODO copy control struct
-        // synchronize
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        //check for camera movement input
         processInput(window);
 
+        //check whether particle trails are turned on and clear buffer if not
         if (ctl_p->trail_checkbtn)
           {
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -132,7 +132,7 @@ int main(void)
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
-        // Accept fragment if it closer to the camera than the former one
+        // Accept fragment if it is closer to the camera than the former one
         glDepthFunc(GL_LESS);
 
         // use own shader
@@ -151,24 +151,23 @@ int main(void)
         // pass mvp to shaders
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &mvp[0][0]);
 
-        // TODO physics engine in own thread --> sleep
-        // TODO measure time since last swap buffers (std::chrono)
+        // TODO measure time since last swap buffers (std::chrono) to decouple time from framerate
 
         if (ctl_p->restart_btn)
           {
             ps.reset();
-            ctl_p->restart_btn = 0;  // critical! TODO
+            ctl_p->restart_btn = 0;
           }
 
         if (ctl_p->reverse_btn)
           {
             ps.reverse();
-            ctl_p->reverse_btn = 0;  // critical! TODO
+            ctl_p->reverse_btn = 0;
           }
 
-        // update gravitational constant
+        // update settings from gui
         ps.setGexponent(ctl_p->g_scale);
-        ps.requestParticles((size_t)ctl_p->num_particles);
+        ps.requestNewSize((size_t)ctl_p->num_particles);
 
         if (!ctl_p->pause_btn)
           {
@@ -179,6 +178,8 @@ int main(void)
                                                     c3p::Particle& p) {
               if (ctl_p->g_checkbtn)
                 {
+                  // apply accumulated gravitational force between all
+                  // particles and this particle
                   p << c3p::accumulate(
                       p, ps.particles(), {ps.g_constant()},
                       c3p::gravity);  // gravitational forces between particles
@@ -186,6 +187,8 @@ int main(void)
 
               if (ctl_p->s_checkbtn)
                 {
+                  // apply accumulated spring force between all
+                  // particles and this particle
                   p << c3p::accumulate(
                       p, ps.particles(),
                       {(float)ctl_p->sl_scale, (float)ctl_p->s_scale},
@@ -194,19 +197,23 @@ int main(void)
 
               if (ctl_p->c_spring_checkbtn)
                 {
+                  // apply spring force between center and this particle
                   p << spring(p, Particle(),
                               {(float)ctl_p->sl_scale, (float)ctl_p->s_scale});
                 }
               if (ctl_p->c_gravity_checkbtn)
                 {
+                  // apply gravitational force between center and this particle
                   p << gravity(p, Particle(100.0f), {ps.g_constant()});
                 }
               if (ctl_p->c_attract_checkbtn)
                 {
+                  // apply attraction force between center and this particle
                   p << simple_attract(p, Particle(10.0), {0.001});
                 }
 
               // check for collision with cube and calculate reflective force
+              // TODO extract into function or add to ParticleSystem class as _boundary
               if (ctl_p->cage_checkbtn)
                 {
                   if (p.location.x >= cage_width_half)
@@ -258,8 +265,9 @@ int main(void)
             });
 
             // update all the particles
-            std::for_each(ps.begin(), ps.end(),
-                          [](c3p::Particle& p) { update(p); });
+            ps.update();
+//            std::for_each(ps.begin(), ps.end(),
+//                          [](c3p::Particle& p) { update(p); });
           }
 
         p_renderer.renderCubes();

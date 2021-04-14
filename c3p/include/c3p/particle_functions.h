@@ -66,6 +66,7 @@ Force accumulate(std::vector<Force> forces);
 
 // update the location and velocity of a particle per time step
 void update(Particle &p);
+
 }
 
 #endif  // C3P__PARTICLE_FUNCTIONS__INCLUDED

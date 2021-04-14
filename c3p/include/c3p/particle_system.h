@@ -29,13 +29,17 @@ class ParticleSystem
   ParticleSystem(size_t size);
   ~ParticleSystem();
 
-  self_t operator=(const self_t &other);
-  self_t operator=(self_t &&other);
+  self_t& operator=(const self_t &other);
+  self_t& operator=(self_t &&other);
 
+  // Initiate the particles in a starting configuration: this includes location, velocity and color
   // Give each particle a random color and location. the velocity is set
   // perpendicular to the location vector (this is what causes the circular
   // movement around 0,0,0)
-  void setRandom();
+  void setStartConfiguration();
+
+  /// update all the particles so that the accelerations are applied
+  void update();
 
   /// reset the location and velocity of each particle to initial values
   void reset();
@@ -43,16 +47,11 @@ class ParticleSystem
   /// invert the velocity vector of each particle (basically reverse in time)
   void reverse();
 
-//  /// add a new particle to the system
-//  void add(Particle &&);
-//
-//  void remove(Particle &p);
-
   /// change the exponent of the gravitational constant for the particle system
   void setGexponent(int exp);
 
   /// request a change in size of the system, fulfilled at next reset
-  void requestParticles(size_t size);
+  void requestNewSize(size_t size);
 
   /// read gravitational constant
   float g_constant() const;
@@ -71,7 +70,8 @@ class ParticleSystem
 
   ParticleContainer::iterator end();
 
- private:
+ protected:
+  
   ParticleContainer _particles;
   float _G;  // the gravatational constant of the system
   size_t _requested_size;

@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 
+#include <c3p/particle_functions.h>
+
 namespace c3p
 {
 using ParticleContainer = std::vector<Particle>;
@@ -21,25 +23,24 @@ ParticleSystem::ParticleSystem(size_t size)
 {
 }
 
-ParticleSystem::~ParticleSystem() = default;  // { delete _particles; }
+ParticleSystem::~ParticleSystem() = default;
 
-self_t ParticleSystem::operator=(const self_t &other)
+self_t& ParticleSystem::operator=(const self_t &other)
 {
   _particles = other._particles;
   _G = other._G;
+  return *this;
 }
 
-self_t ParticleSystem::operator=(self_t &&other)
+self_t& ParticleSystem::operator=(self_t &&other)
 {
   _particles = other._particles;
   _G = other._G;
   _requested_size = other._requested_size;
+  return *this;
 }
 
-// give each particle a random color and location. the velocity is set
-// perpendicular to the location vector (this is what causes the circular
-// movement around 0,0,0)
-void ParticleSystem::setRandom()
+void ParticleSystem::setStartConfiguration()
 {
   for (Particle &p : _particles)
     {
@@ -47,13 +48,21 @@ void ParticleSystem::setRandom()
     }
 }
 
+void ParticleSystem::update()
+{
+  std::for_each(this->begin(), this->end(),
+                [](c3p::Particle& p) { c3p::update(p); });
+}
+
 void ParticleSystem::reset()
 {
   for (Particle &p : _particles)
     {
       p.location = p.origin;
-      p.velocity = glm::vec3(0, 0, 0);
       p.acceleration = glm::vec3(0, 0, 0);
+      p.velocity =
+          glm::normalize(glm::cross(glm::vec3{p.location[0], p.location[1], 0.0},
+                                glm::vec3{0, 0, 1})) * 0.2f;
     }
 
   if (_requested_size <= _particles.size())
@@ -71,12 +80,6 @@ void ParticleSystem::reset()
     }
 }
 
-//void ParticleSystem::add(Particle &&p) { _particles.push_back(p); }
-//void ParticleSystem::remove(Particle &p)
-//{
-//  _particles.erase(std::find(_particles.begin(), _particles.end(), p));
-//}
-
 void ParticleSystem::reverse()
 {
   for (Particle &p : _particles)
@@ -87,7 +90,7 @@ void ParticleSystem::reverse()
 
 void ParticleSystem::setGexponent(int exp) { _G = 1.0 * std::pow(10, exp); }
 
-void ParticleSystem::requestParticles(size_t size) { _requested_size = size; }
+void ParticleSystem::requestNewSize(size_t size) { _requested_size = size; }
 
 float ParticleSystem::g_constant() const { return _G; }
 

@@ -126,6 +126,8 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
 
   GtkWidget* num_particles;
 
+  GtkWidget* num_particles_label;
+
   // create new window
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Particle System Controls");
@@ -145,6 +147,8 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   gtk_box_set_homogeneous(GTK_BOX(box0), TRUE);
   gtk_box_pack_start(GTK_BOX(bigbox), box0, TRUE, FALSE, 20);
 
+  num_particles_label = gtk_label_new("particle number");
+  gtk_box_pack_start(GTK_BOX(box0), num_particles_label, TRUE, FALSE, 5);
   box1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_set_homogeneous(GTK_BOX(box1), TRUE);
   gtk_box_pack_start(GTK_BOX(bigbox), box1, TRUE, FALSE, 20);
@@ -157,6 +161,8 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   gtk_box_set_homogeneous(GTK_BOX(box3), TRUE);
   gtk_box_pack_start(GTK_BOX(bigbox), box3, TRUE, FALSE, 20);
 
+  gravity_c = gtk_label_new("gravity exponent");
+  gtk_box_pack_start(GTK_BOX(box1), gravity_c, TRUE, FALSE, 0);
   box4 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
   gtk_box_set_homogeneous(GTK_BOX(box4), TRUE);
   // gtk_box_pack_start(GTK_BOX(bigbox), box4, TRUE, FALSE, 20);
@@ -181,7 +187,8 @@ static void createParticleCtlWindow(GtkApplication* app, gpointer user_data)
   gtk_box_set_homogeneous(GTK_BOX(box9), TRUE);
   gtk_box_pack_start(GTK_BOX(bigbox), box9, TRUE, FALSE, 20);
 
-  spring_c = gtk_label_new("spring constant");
+  spring_c = gtk_label_new("spring constant, spring length");
+  gtk_box_pack_start(GTK_BOX(box3), spring_c, TRUE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(box3), box3, TRUE, FALSE, 20);
   //  gravity_c;
 

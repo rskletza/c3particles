@@ -39,10 +39,8 @@ Force calc_force(
     const Particle &p1, const Particle &p2,
     std::function<Force(const Particle &p1, const Particle &p2)> ff)
 {
-  // if (&p1 == &p2) //doesn't work for some reason
   if (p1.location == p2.location)
     {
-      //      std::cout << "skipping same particle" << std::endl;
       return glm::vec3(0, 0, 0);
     }
   return ff(p1, p2);
@@ -73,7 +71,7 @@ Force spring(const Particle &p1, const Particle &p2,
 {
   Force result =
       calc_force(p1, p2, [p1, p2, params](const Particle &, const Particle &) {
-        // f = k*x (k is constant and x
+        // f = -k*x (k is spring constant, x is stretch or compression)
         Spring s(params);  // use params to create spring
         glm::vec3 direction = p2.location - p1.location;
         float magnitude = -1 * s.constant * (s.length - glm::length(direction));
